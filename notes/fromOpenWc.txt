@@ -1,0 +1,92 @@
+2d1
+< import { classMap } from 'lit-html/directives/class-map.js';
+3a3
+> import { MainPageMixin } from '../../../mixins/MainPageMixin.js'
+9c9
+< export class PP extends LitElement {
+---
+> export class TestTest extends MainPageMixin(LitElement) {
+16a17,23
+>   routerCallback (params) {
+>     if (params.page === '') params.page = 'main'
+>     if (this.page !== params.page) {
+>       this.page = params.page
+>     }
+>   }
+> 
+57c64
+<       header ul li a.active {
+---
+>       header ul li a[selected] {
+73,74d79
+<     `;
+<   }
+76,78c81,89
+<   constructor() {
+<     super();
+<     this.page = 'main';
+---
+>       .page:not([active]) {
+>         display: none;
+>       }
+> 
+>       .page[active] {
+>         display: block;
+>       }
+> 
+>     `;
+86c97
+<             <a href="#main" class=${this.__navClass('main')} @click=${this.__onNavClicked}>
+---
+>             <a href="/" ?selected="${this.page === 'main'}">
+91c102
+<             <a href="#pageOne" class=${this.__navClass('pageOne')} @click=${this.__onNavClicked}>
+---
+>             <a href="/page-one/10" ?selected="${this.page === 'page-one'}">
+96c107
+<             <a href="#about" class=${this.__navClass('about')} @click=${this.__onNavClicked}>
+---
+>             <a href="/page-about" ?selected="${this.page === 'page-about'}">
+99a111,115
+>           <li>
+>             <a href="/wrong-link">
+>               Wrong
+>             </a>
+>           </li>
+104c120,124
+<         ${this._renderPage()}
+---
+>         <page-main class="page" .logo=${openWcLogo}></page-main>
+>         <page-one class="page"></page-one>
+>         <page-about class="page" page-path="/page-about">${templateAbout}</page-about>
+> 
+>         <page-fallback class="page" fallback><p>Page not found try going to <a href="/main">Main</a></p></page-fallback>
+112,139d131
+<   }
+< 
+<   _renderPage() {
+<     switch (this.page) {
+<       case 'main':
+<         return html`
+<           <page-main .logo=${openWcLogo}></page-main>
+<         `;
+<       case 'pageOne':
+<         return html`
+<           <page-one></page-one>
+<         `;
+<       case 'about':
+<         return templateAbout;
+<       default:
+<         return html`
+<           <p>Page not found try going to <a href="#main">Main</a></p>
+<         `;
+<     }
+<   }
+< 
+<   __onNavClicked(ev) {
+<     ev.preventDefault();
+<     this.page = ev.target.hash.substring(1);
+<   }
+< 
+<   __navClass(page) {
+<     return classMap({ active: this.page === page });

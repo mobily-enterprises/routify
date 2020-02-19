@@ -1,0 +1,25 @@
+{
+  "extends": ["eslint:recommended", "standard", "plugin:lit/recommended"],
+  "parserOptions": {
+    "ecmaVersion": 2020
+  },
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "plugins": [
+    "html",
+    "lit"
+  ],
+  "rules": {
+    "brace-style": "off",
+    "new-cap": ["error", { "capIsNewExceptions": ["Polymer", "LabelsMixin", "NativeReflectorMixin","FormElementMixin", "SyntheticValidatorMixin", "NativeValidatorMixin", "StyleableMixin", "InputMixin", "ThemeableMixin", "AddHasValueAttributeMixin","LitBits"] }],
+    "no-var": "error",
+    "require-jsdoc": "off",
+    "lit/no-legacy-template-syntax": "off",
+    "indent": ["error", 2, { "ignoreComments": true }]
+  },
+  "globals": {
+    "Polymer": true
+  }
+}

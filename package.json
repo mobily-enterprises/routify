@@ -1,0 +1,39 @@
+{
+  "name": "routify",
+  "version": "1.0.1",
+  "description": "The most powerful client-side routing in the west",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs": "cd docs-src;./makeDocs.sh"
+  },
+  "devDependencies": {
+    "standard": "^14.3.1",
+    "eslint": "^6.3.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-html": "^6.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-lit": "^1.2.0",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "docco-next": "^0.9.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mobilyenterprises/routify.git"
+  },
+  "keywords": [
+    "routing",
+    "lit-html"
+  ],
+  "author": "Tony Mobily",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/mobilyenterprises/routify/issues"
+  },
+  "homepage": "https://github.com/mobilyenterprises/routify#readme"
+}
