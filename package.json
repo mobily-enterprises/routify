@@ -1,6 +1,6 @@
 {
   "name": "routify",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "The most powerful client-side routing in the west",
   "main": "index.js",
   "directories": {
@@ -33,7 +33,7 @@
   "author": "Tony Mobily",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/mobilyenterprises/routify/issues"
+    "url": "https://github.com/mobily-enterprises/routify/issues"
   },
-  "homepage": "https://github.com/mobilyenterprises/routify#readme"
+  "homepage": "https://github.com/mobily-enterprises/routify#readme"
 }
