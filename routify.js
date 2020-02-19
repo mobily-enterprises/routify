@@ -52,8 +52,6 @@ export const setConfig = (key, value) => { config[key] = value }
 
 // The `registerRoute()` function is used to add an element to the list of
 // "routing" elements.
-// The function has two very distinct parts; in the first part, a router function
-// is installed. In the second part, the element is actually registered.
 //
 // Before reading on, it's important to understand what `activateCurrentPath()`
 // and `maybeActivateElement() do.`
@@ -68,6 +66,9 @@ export const setConfig = (key, value) => { config[key] = value }
 // for each routing element (that is, every element in the `elements` array).
 // More crucially, it will set the fallback element as active if
 // no active elements were found.
+//
+// This function has two very distinct parts; in the first part, a router function
+// is installed. In the second part, the element is actually registered.
 //
 // ## The first part
 //
@@ -84,7 +85,7 @@ export const setConfig = (key, value) => { config[key] = value }
 // # The second part
 //
 // The second part of the function is run immediately: here, the registered
-// element is pushed into the `element` array. The global variable `fallback` is
+// element is pushed into the `elements` array. The global variable `fallback` is
 // also set if the element is indeed the fallback one (that is, it has the
 // correct attribute set).
 //
