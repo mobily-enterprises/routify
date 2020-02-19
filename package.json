@@ -1,6 +1,6 @@
 {
   "name": "routify",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "The most powerful client-side routing in the west",
   "main": "index.js",
   "directories": {
@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mobilyenterprises/routify.git"
+    "url": "git+https://github.com/mobily-enterprises/routify.git"
   },
   "keywords": [
     "routing",
