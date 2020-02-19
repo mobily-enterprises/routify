@@ -27,8 +27,16 @@ let activeElement = null
 
 // routify can be configured by the `setConfig` function, which will set
 // keys for the module variable `config`. The configuration defines
-// what attribute and property are toggled for routed elements, and what
-// attribute and property are used to work out an element's path.
+// what attribute and property are used for:
+// * elements' active flag
+// * elements' paths
+// * define an element as fallback
+// * disable activation for the element, used for the main page
+// * elements' callback functions
+//
+// Developers can redefine these by using the `setConfig()` function:
+//
+//     setConfig('activeProperty', 'activated')
 const config = {
   activeAttribute: 'active',
   activeProperty: 'active',
@@ -42,6 +50,51 @@ const config = {
 }
 export const setConfig = (key, value) => { config[key] = value }
 
+// The `registerRoute()` function is used to add an element to the list of
+// "routing" elements.
+// The function has two very distinct parts; in the first part, a router function
+// is installed. In the second part, the element is actually registered.
+//
+// Before reading on, it's important to understand what `activateCurrentPath()`
+// and `maybeActivateElement() do.`
+//
+// `maybeActivateElement()` is responsible for _maybe_ activating an element,
+// where _activating_ means setting the active attribute to true. This
+// function only works on _one_ element. Crucially, if the element is active,
+// it will attempt to run the `routerCallback()` function and
+// set the global `activeElement` variable as that element.
+//
+// `activateCurrentPath()` on the other hand will run `maybeActivateElement()`
+// for each routing element (that is, every element in the `elements` array).
+// More crucially, it will set the fallback element as active if
+// no active elements were found.
+//
+// ## The first part
+//
+// In order for Routify to work, it needs to intercept mouse clicks so that
+// rather than changing page (and triggering a full reload), a callback
+// is called. This is achieved by the `installRoute` function by the Polymer team.
+// Note that in an application the router must only be installed once. Rather
+// than forcing developers to run an initialisation function, it's best to
+// install the router when `registerRoute()` is called.
+//
+// The function `activeCurrentPath` is run every time there is a route
+// change. This will ensure that the correct page is marked as active.
+//
+// # The second part
+//
+// The second part of the function is run immediately: here, the registered
+// element is pushed into the `element` array. The global variable `fallback` is
+// also set if the element is indeed the fallback one (that is, it has the
+// correct attribute set).
+//
+// Once the element is added, the system needs to be check whether it's active
+// or not. Running `activateCurrentPath()` definitely works. However, it would
+// be an overkill, since each path will be checked again after registering
+// each new element. If there is no fallback defined, `maybeActivateElement(el)`
+// (which focuses on the element itself) is enough. However, if a fallback is
+// defined, then `activateCurrentPath()` is needed. This is why it's ideal to
+// define fallback pages last.
 export function registerRoute (el) {
   if (!routerInstalled) {
     installRouter(async (location, e) => {
@@ -53,31 +106,10 @@ export function registerRoute (el) {
   if (!fallback && getFallbackFromEl(el)) fallback = el
   elements.push(el)
 
-  if (fallback) {
-    activateCurrentPath(null)
-  } else {
+  if (!fallback) {
     maybeActivateElement(el)
-  }
-}
-
-export function registerRouteFromSelector (root, selector) {
-  for (const el of root.querySelectorAll(selector)) {
-    if (!elements.find(item => item === el)) registerRoute(el)
-  }
-}
-
-export function activateCurrentPath (e) {
-  if (!elements.length) return
-
-  let oneActive = false
-  for (const el of elements) {
-    const isActive = maybeActivateElement(el)
-    oneActive = oneActive || isActive
-  }
-  if (fallback) {
-    const fallbackActive = !oneActive
-    toggleElementActive(fallback, fallbackActive)
-    if (fallbackActive && fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty](location, null)
+  } else {
+    activateCurrentPath(null)
   }
 }
 
@@ -114,10 +146,32 @@ const maybeActivateElement = function (el) {
   return !!isActiveWithParams
 }
 
+export function activateCurrentPath (e) {
+  if (!elements.length) return
+
+  activeElement = null
+  let oneActive = false
+  for (const el of elements) {
+    const isActive = maybeActivateElement(el)
+    oneActive = oneActive || isActive
+  }
+  if (fallback) {
+    const fallbackActive = !oneActive
+    toggleElementActive(fallback, fallbackActive)
+    if (fallbackActive && fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty](location, null)
+  }
+}
+
 const toggleElementActive = (el, active) => {
   el[config.activeProperty] = active
   el.toggleAttribute(config.activeAttribute, active)
   if (active) el.dispatchEvent(new CustomEvent('route-activated', { details: { element: el }, bubbles: true, composed: true }))
+}
+
+export function registerRouteFromSelector (root, selector) {
+  for (const el of root.querySelectorAll(selector)) {
+    if (!elements.find(item => item === el)) registerRoute(el)
+  }
 }
 
 export function pagePathFromEl (el) {
