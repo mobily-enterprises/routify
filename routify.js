@@ -125,8 +125,8 @@ const maybeActivateElement = function (el) {
 
   /* Detour: activation is disabled. Just run the callback if present */
   /* and just return false, since item wasn't activated */
-  if (activationDisabled && isActiveWithParams && el[config.routerCallbackProperty]) {
-    el[config.routerCallbackProperty](isActiveWithParams, location, null)
+  if (activationDisabled && isActiveWithParams) {
+    if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, location, null)
     return false
   }
 
