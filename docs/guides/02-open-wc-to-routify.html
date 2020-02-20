@@ -59,8 +59,8 @@
                 
                 
                   <li>
-                      <a class="source  indented  current " href="open-wc-to-routify.html">
-                          open wc to routify
+                      <a class="source  indented " href="01-straight-html.html">
+                          01 straight html
                       </a>
                   </li>
                 
@@ -68,8 +68,17 @@
                 
                 
                   <li>
-                      <a class="source  indented " href="straight-html.html">
-                          straight html
+                      <a class="source  indented  current " href="02-open-wc-to-routify.html">
+                          02 open wc to routify
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source  indented " href="03-open-wc-page-with-parameter.html">
+                          03 open wc page with parameter
                       </a>
                   </li>
                 
@@ -103,7 +112,7 @@ You can do the same thing by running:</p>
           
             
             <p>First of all, install routify.js from npm:</p>
-<pre><code>$ npm install routify</code></pre><h2 id="step-2-routify-your-main-component">Step 2: Routify your main component</h2>
+<pre><code>$ npm install --save routify</code></pre><h2 id="step-2-routify-your-main-component">Step 2: Routify your main component</h2>
 
             
           
@@ -177,7 +186,7 @@ To do that, add this to the top:</p>
             
           
             
-            <p>Changes to PageOne are nearly identical Open the file <code>components/page-main/src/PageMain.js</code>.</p>
+            <p>Changes to PageOne are nearly identical Open the file <code>components/page-main/src/PageOne.js</code>.</p>
 <p>Add this to the top:</p>
 <pre><code>import { MainPageMixin } from &#39;routify/lit/RoutingPageMixin.js&#39;</code></pre><p>And change the class declaration into:</p>
 <pre><code>export class PageOne extends RoutingPageMixin(LitElement) {</code></pre><p>Finally, make the element aware of its paths by adding this line:</p>
@@ -252,12 +261,14 @@ static get pagePath () { return '/:page' }</code></pre><p>Just like any other pa
             
           
             
-            <p>Your application is now fully routing-aware. The files changed are:</p>
+            <p>Your application is now fully routing-aware. The full source code of the files that were changed is here:</p>
 <ul>
-<li><a href="open-wc-to-routify/RoutingApp.js">RoutingApp.js</a></li>
-<li><a href="open-wc-to-routify/PageMain.js">PageMain.js</a></li>
-<li><a href="open-wc-to-routify/PageOne.js">PageOne.js</a></li>
+<li><a href="02-open-wc-to-routify/RoutingApp.js">RoutingApp.js</a></li>
+<li><a href="02-open-wc-to-routify/PageMain.js">PageMain.js</a></li>
+<li><a href="02-open-wc-to-routify/PageOne.js">PageOne.js</a></li>
 </ul>
+<p>You can replace the default open-wc files as long as you have created the project with the same parameters used in this guide.
+Don’t forget to run <code>npm install --save routify</code> and it should all work.</p>
 
             
           

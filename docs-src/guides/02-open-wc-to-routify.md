@@ -22,7 +22,7 @@ Now, let's get to work.
 
 First of all, install routify.js from npm:
 
-    $ npm install routify
+    $ npm install --save routify
 
 ## Step 2: Routify your main component
 
@@ -121,7 +121,7 @@ That's it: loading the app in the browser now, you will see that this element wi
 
 ### Change PageOne
 
-Changes to PageOne are nearly identical Open the file `components/page-main/src/PageMain.js`.
+Changes to PageOne are nearly identical Open the file `components/page-main/src/PageOne.js`.
 
 Add this to the top:
 
@@ -225,8 +225,11 @@ Just like any other page, the `routerCallback()` will be called with the matchin
 
 ## Step 6: Party!
 
-Your application is now fully routing-aware. The files changed are:
+Your application is now fully routing-aware. The full source code of the files that were changed is here:
 
-* [RoutingApp.js](open-wc-to-routify/RoutingApp.js)
-* [PageMain.js](open-wc-to-routify/PageMain.js)
-* [PageOne.js](open-wc-to-routify/PageOne.js)
+* [RoutingApp.js](02-open-wc-to-routify/RoutingApp.js)
+* [PageMain.js](02-open-wc-to-routify/PageMain.js)
+* [PageOne.js](02-open-wc-to-routify/PageOne.js)
+
+You can replace the default open-wc files as long as you have created the project with the same parameters used in this guide.
+Don't forget to run `npm install --save routify` and it should all work.
