@@ -12,3 +12,4 @@ echo "tpelements.com" > ../docs/CNAME
        	guides/*\
         routify.js
 cp -r ./images ../docs/
+cp --parents -pr guides/*/* ../docs

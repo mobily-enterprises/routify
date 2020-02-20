@@ -206,12 +206,59 @@ firstUpdated () {
   registerRoute(this.shadowRoot.querySelector(&#39;page-about&#39;))
   registerRoute(this.shadowRoot.querySelector(&#39;page-fallback&#39;))
 }</code></pre><p>They are equivalent.</p>
-<h2 id="step-5-party">Step 5: Party!</h2>
+<p>Once this is done, you will see that <em>all</em> of the pages finally work. Even better, when clicking on the wrong link, the fallback page (marked so with the <code>fallback</code> attribute) is marked as active and therefore shown.</p>
+<h2 id="step-5-make-the-links-aware-of-the-current-page">Step 5: Make the links aware of the current page</h2>
 
             
           
             
+            <p>One final touch is making sure that the current page stays selected in the navigation menu at the top.</p>
+<p>For this to work, the main page <code>components/routing-app/src/RoutingApp.js</code> must be changed so that two things happen:</p>
+<p>1) Links need to be set as <code>selected</code> by adding a <code>selected</code> attribute (conditionally added depending on the <code>page</code> property).</p>
+<pre><code><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span></span>
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/"</span> ?<span class="hljs-attr">selected</span>=<span class="hljs-string">"${this.page === 'main'}"</span>&gt;</span></span>
+<span class="hljs-code">    Main</span>
+  <span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span></span>
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/page-one"</span> ?<span class="hljs-attr">selected</span>=<span class="hljs-string">"${this.page === 'page-one'}"</span>&gt;</span></span>
+<span class="hljs-code">    Page One</span>
+  <span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span></span>
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/page-about"</span> ?<span class="hljs-attr">selected</span>=<span class="hljs-string">"${this.page === 'page-about'}"</span>&gt;</span></span>
+<span class="hljs-code">    About</span>
+  <span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span></span>
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/wrong-link"</span>&gt;</span></span>
+<span class="hljs-code">    Wrong</span>
+  <span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span></code></pre><p>To do that, .
+Also, change the CSS selector that comes by default for the links, so that it’s simpler. From:</p>
+<pre><code>   header ul li a.active {</code></pre><p>To:</p>
+<pre><code>   header ul li a[selected] {</code></pre><p>2) Set the <code>page</code> property needs to be set.</p>
+<p>This is where routify.js shines: in order to set the <code>page</code> property, all is needed is defining a route for the main page itself (just <code>/:page</code>) and a <code>routerCallback()</code> function which will be called when the route changes:</p>
+<pre><code>routerCallback (params) {
+  if (params.page === '') params.page = 'main'
+  if (this.page !== params.page) {
+<span class="hljs-code">    this.page = params.page</span>
+  }
+}
+
+static get pagePath () { return '/:page' }</code></pre><p>Just like any other page, the <code>routerCallback()</code> will be called with the matching parameters – in this case, <code>params.page</code> will be set because the <code>pageUrl</code> property has <code>:page</code>. At that point, the <code>page</code> property of this element is set – which will in turn influence the <code>selected</code> attribute of the links.</p>
+<h2 id="step-6-party">Step 6: Party!</h2>
+
             
+          
+            
+            <p>Your application is now fully routing-aware. The files changed are:</p>
+<ul>
+<li><a href="open-wc-to-routify/RoutingApp.js">RoutingApp.js</a></li>
+<li><a href="open-wc-to-routify/PageMain.js">PageMain.js</a></li>
+<li><a href="open-wc-to-routify/PageOne.js">PageOne.js</a></li>
+</ul>
+
             
           
         </div>

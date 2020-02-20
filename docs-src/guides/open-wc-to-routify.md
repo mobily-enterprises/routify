@@ -167,6 +167,66 @@ This will make sure that every element satisfying the selector `.page` will beco
 
 They are equivalent.
 
-## Step 5: Party!
+Once this is done, you will see that _all_ of the pages finally work. Even better, when clicking on the wrong link, the fallback page (marked so with the `fallback` attribute) is marked as active and therefore shown.
 
-Your application is now fully routing-aware.
+## Step 5: Make the links aware of the current page
+
+One final touch is making sure that the current page stays selected in the navigation menu at the top.
+
+For this to work, the main page `components/routing-app/src/RoutingApp.js` must be changed so that two things happen:
+
+1) Links need to be set as `selected` by adding a `selected` attribute (conditionally added depending on the `page` property).
+
+    <li>
+      <a href="/" ?selected="${this.page === 'main'}">
+        Main
+      </a>
+    </li>
+    <li>
+      <a href="/page-one" ?selected="${this.page === 'page-one'}">
+        Page One
+      </a>
+    </li>
+    <li>
+      <a href="/page-about" ?selected="${this.page === 'page-about'}">
+        About
+      </a>
+    </li>
+    <li>
+      <a href="/wrong-link">
+        Wrong
+      </a>
+    </li>
+
+To do that, .
+Also, change the CSS selector that comes by default for the links, so that it's simpler. From:
+
+       header ul li a.active {
+
+To:
+
+       header ul li a[selected] {
+
+2) Set the `page` property needs to be set.
+
+This is where routify.js shines: in order to set the `page` property, all is needed is defining a route for the main page itself (just `/:page`) and a `routerCallback()` function which will be called when the route changes:
+
+
+    routerCallback (params) {
+      if (params.page === '') params.page = 'main'
+      if (this.page !== params.page) {
+        this.page = params.page
+      }
+    }
+
+    static get pagePath () { return '/:page' }
+
+Just like any other page, the `routerCallback()` will be called with the matching parameters -- in this case, `params.page` will be set because the `pageUrl` property has `:page`. At that point, the `page` property of this element is set -- which will in turn influence the `selected` attribute of the links.
+
+## Step 6: Party!
+
+Your application is now fully routing-aware. The files changed are:
+
+* [RoutingApp.js](open-wc-to-routify/RoutingApp.js)
+* [PageMain.js](open-wc-to-routify/PageMain.js)
+* [PageOne.js](open-wc-to-routify/PageOne.js)
