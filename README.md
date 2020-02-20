@@ -1,6 +1,6 @@
 # Welcome to routify.js
 
-[routify.js](routify.html) (yes, it's literate code!) is the most unintrusive, and yet most powerful, client-side routing system for
+[routify.js](https://mobily-enterprises.github.io/routify/routify.html) (yes, it's literate code!) is the most unintrusive, and yet most powerful, client-side routing system for
 Single Page Applications (SPas) out there.
 It's written in modern ES6 Javascript, has fallback support, and it does as little as possible
 while being very powerful.
