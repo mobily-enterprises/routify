@@ -1,4 +1,4 @@
-import { registerRoute, registerRouteFromSelector } from '../routify'
+import { registerRoute, registerRoutesFromSelector } from '../routify'
 
 export const MainPageMixin = (base) => {
   return class Base extends base {
@@ -22,7 +22,7 @@ export const MainPageMixin = (base) => {
       super.firstUpdated()
 
       if (this.constructor.routifySelector) {
-        registerRouteFromSelector(this.shadowRoot, this.constructor.routifySelector)
+        registerRoutesFromSelector(this.shadowRoot, this.constructor.routifySelector)
       }
     }
   }

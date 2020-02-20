@@ -7,12 +7,8 @@ echo "tpelements.com" > ../docs/CNAME
        	-t tpe.ejs\
        	-o ../docs\
        	index.md\
-       	quickstart-designers.md\
-       	tutorials-designers.md\
-       	tutorials-designers/*\
-       	quickstart-developers.md\
-       	tutorials-developers.md\
-       	tutorials-developers/*\
-        appendices.md\
-        appendices/*.md
+       	api.md\
+       	guides.md\
+       	guides/*\
+        routify.js
 cp -r ./images ../docs/

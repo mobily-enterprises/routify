@@ -23,7 +23,7 @@ function prettySource(s) {
 
 function tocClasses(s, source) {
   var indent = s.match('/') ? ' indented ' : ''
-  var current = s === source  || s.split('.')[0] === source.split('/')[0] 
+  var current = s === source  || s.split('.')[0] === source.split('/')[0]
     ? ' current '
     : ''
   return '' + indent + current
@@ -51,12 +51,6 @@ function tocClasses(s, source) {
           </div>
         </div>
 
-        <% if (firstSectionIsTitle) { %>
-          <% var section = sections.shift(); %>
-          <% if (!(/^\s*$/).test(section.codeText)) { %>
-            <%- section.codeHtml %>
-          <% } %>
-        <% } %>
       </div>
       <div class="main">
         <% if (sources.length > 1) { %>
@@ -64,7 +58,7 @@ function tocClasses(s, source) {
             <ul>
               <% for (var i=0, l = sources.length; i < l; i++) { %>
                 <% var s = sources[i]; %>
-                <% if (display(s)) { %>
+                <% if (display(s) || true) { %>
                   <li>
                       <a class="source <%= tocClasses(s, source) %>" href="<%= relativeToThisFile(finalPath(s)) %>">
                           <%- prettySource(s) %>

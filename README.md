@@ -16,3 +16,7 @@ Routify integrates with the following libraries:
 
 * lit-element. Routify provides two mixins which will enable routing for your main page
 and any other pages in no time. Batteries included!
+
+## Read the code!
+
+[routify.js code](routify.html) is literate, and very easy to read! 

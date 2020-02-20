@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+
+
+<html>
+<head>
+  <title>Routify&#39;s source code</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="tpe.css" />
+</head>
+<body>
+  <div class="container">
+      <div class="header">
+        <div class="topbar">
+          <div id="logo" alt="TPE">
+          </div>
+          <h3>Routify&#39;s source code</h3>
+          <!-- <img id="logo" src="/images/TPE_logo_white.png" height="60px" alt="TPE" > -->
+          <div class="links">
+            <a href="https://github.com/mobily-enterprises/tpe" target="_blank" title="View on GitHub">
+              <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub icon</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            </a>
+          </div>
+        </div>
+
+      </div>
+      <div class="main">
+        
+          <div class="toc">
+            <ul>
+              
+                
+                
+                  <li>
+                      <a class="source " href="index.html">
+                          index
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source " href="api.html">
+                          api
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source " href="guides.html">
+                          guides
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source  indented " href="guides/lit-element.html">
+                          lit element
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source  indented " href="guides/straight-html.html">
+                          straight html
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source  current " href="routify.html">
+                          routify.js
+                      </a>
+                  </li>
+                
+              
+            </ul>
+          </div>
+        
+        <div class="contentPage">
+          
+            
+            <p>routify is an unintrusive module that deals with routing and fallback
+management.
+In a nutshell, all routify does is set a specific attribute/property (<code>active</code>
+by default) depending on whether an element satisfies a routing pattern
+(e.g. ‘/view-jobs/:id’). It will also run a callback</p>
+<h2 id="modules-variables">Module’s variables</h2>
+
+            
+          
+            
+            <p>routify uses some variables common to all functions: the list of
+observed elements (<code>elements</code>), a flag to know if the <code>installRouter</code> was
+already called (<code>routerInstalled</code>) and a default fallback element (<code>fallback</code>)</p>
+
+            
+              <div class='highlight'><pre><span class="hljs-keyword">const</span> elements = []
+<span class="hljs-keyword">let</span> routerInstalled = <span class="hljs-literal">false</span>
+<span class="hljs-keyword">let</span> fallback = <span class="hljs-literal">null</span>
+<span class="hljs-keyword">let</span> activeElement = <span class="hljs-literal">null</span></pre></div>
+            
+          
+            
+            <h2 id="configuration-options-and-helpers">Configuration options and helpers</h2>
+
+            
+          
+            
+            <p>routify can be configured by the <code>setConfig</code> function, which will set
+keys for the module variable <code>config</code>. The configuration defines
+what attribute and property are used for:</p>
+<ul>
+<li>elements’ active flag</li>
+<li>elements’ paths</li>
+<li>define an element as fallback</li>
+<li>disable activation for the element, used for the main page</li>
+<li>elements’ callback functions</li>
+</ul>
+<p>Developers can redefine these by using the <code>setConfig()</code> function:</p>
+<pre><code>setConfig(<span class="hljs-string">'activeProperty'</span>, <span class="hljs-string">'activated'</span>)</code></pre>
+            
+              <div class='highlight'><pre><span class="hljs-keyword">const</span> config = {
+  <span class="hljs-attr">activeAttribute</span>: <span class="hljs-string">'active'</span>,
+  <span class="hljs-attr">activeProperty</span>: <span class="hljs-string">'active'</span>,
+  <span class="hljs-attr">pathAttribute</span>: <span class="hljs-string">'page-path'</span>,
+  <span class="hljs-attr">pathProperty</span>: <span class="hljs-string">'pagePath'</span>,
+  <span class="hljs-attr">fallbackAttribute</span>: <span class="hljs-string">'fallback'</span>,
+  <span class="hljs-attr">fallbackProperty</span>: <span class="hljs-string">'fallback'</span>,
+  <span class="hljs-attr">disableActivationAttribute</span>: <span class="hljs-string">'disable-activation'</span>,
+  <span class="hljs-attr">disableActivationProperty</span>: <span class="hljs-string">'disableActivation'</span>,
+  <span class="hljs-attr">routerCallbackProperty</span>: <span class="hljs-string">'routerCallback'</span>
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> setConfig = <span class="hljs-function">(<span class="hljs-params">key, value</span>) =&gt;</span> { config[key] = value }</pre></div>
+            
+          
+            
+            <p>An element can be configured for routify in several different ways: via
+attributes, properties or constructors’ properties.
+For example the path an element will depend on for activation can be specified
+using:</p>
+<ul>
+<li>The attribute <code>page-path</code><pre><code>&lt;page-about <span class="hljs-class"><span class="hljs-keyword">class</span></span>=<span class="hljs-string">"page"</span> page-path=<span class="hljs-string">"/page-about"</span>&gt;...&lt;<span class="hljs-regexp">/page-about&gt;</span></code></pre></li>
+<li>The property <code>pagePath</code><pre><code>&lt;page-about id="about" class="page"&gt;...&lt;/page-about&gt;
+&lt;script&gt;window.querySelector('#about').pagePath = "/page-about"</code></pre></li>
+<li>The property <code>pagePath</code> in the element’s constructor. Useful for litElement
+class definitions:<pre><code><span class="hljs-keyword">static</span> <span class="hljs-keyword">get</span> pagePath () { <span class="hljs-keyword">return</span> <span class="hljs-string">'/page-one/:id'</span> }</code></pre></li>
+</ul>
+<p>The following functions are helper functions to facilitate the fetching
+of the configuration options wherever they are.</p>
+
+            
+              <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">pagePathFromEl</span> (<span class="hljs-params">el</span>) </span>{
+  <span class="hljs-keyword">return</span> el.getAttribute(config.pathAttribute) ||
+         el[config.pathProperty] ||
+         el.constructor[config.pathProperty] ||
+         <span class="hljs-literal">false</span>
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getFallbackFromEl</span> (<span class="hljs-params">el</span>) </span>{
+  <span class="hljs-keyword">return</span> el.getAttribute(config.fallbackAttribute) !== <span class="hljs-literal">null</span> ||
+         el[config.fallbackProperty] ||
+         el.constructor[config.fallbackProperty] ||
+         <span class="hljs-literal">false</span>
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDisableActivationFromEl</span> (<span class="hljs-params">el</span>) </span>{
+  <span class="hljs-keyword">return</span> el.getAttribute(config.disableActivationAttribute) !== <span class="hljs-literal">null</span> ||
+         el[config.disableActivationProperty] ||
+         el.constructor[config.disableActivationProperty] ||
+         <span class="hljs-literal">false</span>
+}</pre></div>
+            
+          
+            
+            <h2 id="registration-and-activation-of-elements">Registration and activation of elements</h2>
+
+            
+          
+            
+            <p>The heart of routify is the <code>registerRoute()</code> function, which is used to
+add an element to the list of routing” elements.</p>
+<p>To understand what <code>registerRoute()</code> does, it’s important to first understand
+what <code>activateCurrentPath()</code> and <code>maybeActivateElement()</code> do.</p>
+<h3 id="maybeactivateelement">maybeActivateElement()</h3>
+
+            
+          
+            
+            <p><code>maybeActivateElement()</code> will check whether the browser’s location matches
+the element’s location pattern. If it does, it will set the activate
+attribute/property as true. The check is done using the <code>locationMatch()</code>
+function explained later.</p>
+<p>It’s crucial to remember that it only works on <em>one</em> element: it is responsible
+for <em>maybe</em> activating <em>one specific</em> element, where <em>activating</em> means setting
+the active attribute/property to true.
+If the element is active, it will also set the module’s <code>activeElement</code> variable
+and will attempt to run the <code>routerCallback()</code> function.</p>
+<p>Some elements might want to register for the routing callback, but <em>without</em>
+being activated. The app’s main page is a prime example of this: it will want
+to know if the current page has changed in order to ‘know’ what page is being
+displayed (useful to highlight the right tab).</p>
+<p>This is achieved using the <code>disable-activation</code> attribute or <code>disableActivation</code>
+property, which will cause the function to detour, and only run the
+callback – skiping any of the activation logic.</p>
+
+            
+              <div class='highlight'><pre><span class="hljs-keyword">const</span> maybeActivateElement = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">el</span>) </span>{
+  <span class="hljs-keyword">const</span> path = pagePathFromEl(el)
+
+  <span class="hljs-comment">/* No path, no setting nor unsetting of `active` */</span>
+  <span class="hljs-keyword">if</span> (!path &amp;&amp; el !== fallback) {
+    <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'Routing element does not have a path:'</span>, el)
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+  }
+
+  <span class="hljs-keyword">const</span> activationDisabled = getDisableActivationFromEl(el)
+  <span class="hljs-keyword">const</span> isActiveWithParams = locationMatch(path)
+
+  <span class="hljs-comment">/* Detour: activation is disabled. Just run the callback if present */</span>
+  <span class="hljs-comment">/* and just return false, since item wasn't activated */</span>
+  <span class="hljs-keyword">if</span> (activationDisabled &amp;&amp; isActiveWithParams &amp;&amp; el[config.routerCallbackProperty]) {
+    el[config.routerCallbackProperty](isActiveWithParams, location, <span class="hljs-literal">null</span>)
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+  }
+
+  <span class="hljs-comment">/* Toggle the active property/attribute */</span>
+  toggleElementActive(el, !!isActiveWithParams)
+
+  <span class="hljs-comment">/* If active, call the callback (if present) AND set the element as "the"
+  /* currently active  element */</span>
+  <span class="hljs-keyword">if</span> (isActiveWithParams) {
+    <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty] &amp;&amp; el !== activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, <span class="hljs-literal">null</span>)
+    <span class="hljs-keyword">if</span> (!activationDisabled) activeElement = el
+  }
+
+  <span class="hljs-comment">/* Return true or false, depending on the element being active or not */</span>
+  <span class="hljs-keyword">return</span> !!isActiveWithParams
+}</pre></div>
+            
+          
+            
+            <p><code>maybeActivateElement()</code> only deals with one specific element,
+<code>activateCurrentPath()</code>, on the other hand, will run <code>maybeActivateElement()</code>
+for each routing element (that is, every element in the <code>elements</code> array).
+More crucially, it will set the fallback element as active if
+no active elements were found.</p>
+
+            
+              <div class='highlight'><pre><span class="hljs-keyword">const</span> activateCurrentPath = <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> {
+  <span class="hljs-keyword">if</span> (!elements.length) <span class="hljs-keyword">return</span>
+
+  activeElement = <span class="hljs-literal">null</span>
+  <span class="hljs-keyword">let</span> oneActive = <span class="hljs-literal">false</span>
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> el <span class="hljs-keyword">of</span> elements) {
+    <span class="hljs-keyword">const</span> isActive = maybeActivateElement(el)
+    oneActive = oneActive || isActive
+  }
+  <span class="hljs-keyword">if</span> (fallback) {
+    <span class="hljs-keyword">const</span> fallbackActive = !oneActive
+    toggleElementActive(fallback, fallbackActive)
+    <span class="hljs-keyword">if</span> (fallbackActive &amp;&amp; fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty](location, <span class="hljs-literal">null</span>)
+  }
+}</pre></div>
+            
+          
+            
+            <p>Both the functions above use this simple helper that will toggle the <code>active</code>
+attribute and property, and will emit a route-activated event if
+the route was activated</p>
+
+            
+              <div class='highlight'><pre><span class="hljs-keyword">const</span> toggleElementActive = <span class="hljs-function">(<span class="hljs-params">el, active</span>) =&gt;</span> {
+  el[config.activeProperty] = active
+  el.toggleAttribute(config.activeAttribute, active)
+  <span class="hljs-keyword">if</span> (active) el.dispatchEvent(<span class="hljs-keyword">new</span> CustomEvent(<span class="hljs-string">'route-activated'</span>, { <span class="hljs-attr">details</span>: { <span class="hljs-attr">element</span>: el }, <span class="hljs-attr">bubbles</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">composed</span>: <span class="hljs-literal">true</span> }))
+}</pre></div>
+            
+          
+            
+            <h3 id="registering-routes">Registering routes</h3>
+
+            
+          
+            
+            <p>The heard of routify.js is the <code>registerRoute()</code> function, which will
+turn an HTML element in the page into a location-aware element that will
+activate itself when the browser’s path matches the element’s path template.</p>
+<p>This function has two very distinct parts; in the first part, a router function
+is installed. In the second part, the element is actually registered.</p>
+<h2 id="the-first-part">The first part</h2>
+
+            
+          
+            
+            <p>In order for Routify to work, it needs to intercept mouse clicks so that
+rather than changing page (and triggering a full reload), a callback
+is called. This is achieved by the <code>installRoute</code> function, <em>strongly</em> inspired
+by the <code>routing.js</code> file in the <code>pwa-helpers</code> package by the Polymer team.
+Note that in an application the router must only be installed once. So,
+<code>installRoute()</code> is called only the first time <code>registerRoute()</code> is called.</p>
+<p>The function <code>activeCurrentPath</code> is run every time there is a location
+change. This will ensure that the correct element is marked as active – and
+more crucially that other non-matching elements are not active.</p>
+<h2 id="the-second-part">The second part</h2>
+
+            
+          
+            
+            <p>The second part of the function is run immediately: here, the registered
+element is pushed into the <code>elements</code> array. The global variable <code>fallback</code> is
+also set if the element is indeed the fallback one (that is, it has the
+correct attribute/property set).</p>
+<p>Once the element is added, the system needs to be check whether it’s active
+or not. Running <code>activateCurrentPath()</code> definitely works. However, it would
+be an overkill, since each element in the (growing) <code>elements</code> array will be
+checked each tim after registering a new element.</p>
+<p>If there is no fallback defined, <code>maybeActivateElement(el)</code>
+(which focuses on the element itself) is enough, since it can safely be assumed
+that the page’s location will stay the same between calls.
+However, if a fallback is defined, then <code>activateCurrentPath()</code> is needed since
+it’s the only function that will set the fallback as active if necessary (that’s
+because it’s impossible to know if none of the elements are active unless
+they are all checked).</p>
+<p>This is why it’s ideal, for performance, to define fallback pages last.
+Another function, <code>registerRoutesFromSelector()</code>, is provided to
+mass-register all elements satisfying a specific selector.</p>
+
+            
+              <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">registerRoute</span> (<span class="hljs-params">el</span>) </span>{
+  <span class="hljs-keyword">if</span> (!routerInstalled) {
+    installRouter(<span class="hljs-keyword">async</span> (location, e) =&gt; {
+      activateCurrentPath(e)
+    })
+    routerInstalled = <span class="hljs-literal">true</span>
+  }
+
+  <span class="hljs-keyword">if</span> (!fallback &amp;&amp; getFallbackFromEl(el)) fallback = el
+  elements.push(el)
+
+  <span class="hljs-keyword">if</span> (!fallback) {
+    maybeActivateElement(el)
+  } <span class="hljs-keyword">else</span> {
+    activateCurrentPath(<span class="hljs-literal">null</span>)
+  }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">registerRoutesFromSelector</span> (<span class="hljs-params">root, selector</span>) </span>{
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> el <span class="hljs-keyword">of</span> root.querySelectorAll(selector)) {
+    <span class="hljs-keyword">if</span> (!elements.find(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item === el)) registerRoute(el)
+  }
+}</pre></div>
+            
+          
+            
+            <p>This function is <em>extremely</em> inspired by the <code>installRouter</code> function found
+in the <a href="https://www.npmjs.com/package/pwa-helpers">pwa-helpers</a> package by
+the Polymer team.
+It’s the original source but linted, reformatted from typescript, and fully commented.</p>
+<p>The main aim of installRouter is to define a callback that will be called
+every time the URL changes. This is achieved by listening to the <code>click</code> event:
+when a “normal” link is clicked, <code>preventDefault()</code> is called and the location
+is artificially added to the browser’s history with a pushState call.</p>
+
+            
+              <div class='highlight'><pre><span class="hljs-keyword">const</span> installRouter = <span class="hljs-function">(<span class="hljs-params">locationUpdatedCallback</span>) =&gt;</span> {
+  <span class="hljs-comment">/* Listen for the click event */</span>
+  <span class="hljs-built_in">document</span>.body.addEventListener(<span class="hljs-string">'click'</span>, e =&gt; {
+    <span class="hljs-keyword">if</span> (e.defaultPrevented || e.button !== <span class="hljs-number">0</span> || e.metaKey || e.ctrlKey || e.shiftKey) <span class="hljs-keyword">return</span>
+
+    <span class="hljs-comment">/* Check that the clicked element is indeed a "pure" link (no */</span>
+    <span class="hljs-comment">/* 'download' or rel=external attribute */</span>
+    <span class="hljs-keyword">const</span> anchor = e.composedPath().filter(<span class="hljs-function"><span class="hljs-params">n</span> =&gt;</span> n.tagName === <span class="hljs-string">'A'</span>)[<span class="hljs-number">0</span>]
+    <span class="hljs-keyword">if</span> (!anchor || anchor.target || anchor.hasAttribute(<span class="hljs-string">'download'</span>) || anchor.getAttribute(<span class="hljs-string">'rel'</span>) === <span class="hljs-string">'external'</span>) <span class="hljs-keyword">return</span>
+
+    <span class="hljs-comment">/* Check that it does have href, and it's not a mailto: link */</span>
+    <span class="hljs-keyword">const</span> href = anchor.href
+    <span class="hljs-keyword">if</span> (!href || href.indexOf(<span class="hljs-string">'mailto:'</span>) !== <span class="hljs-number">-1</span>) <span class="hljs-keyword">return</span>
+
+    <span class="hljs-comment">/* Check that it's a local link */</span>
+    <span class="hljs-keyword">const</span> location = <span class="hljs-built_in">window</span>.location
+    <span class="hljs-keyword">const</span> origin = location.origin || location.protocol + <span class="hljs-string">'//'</span> + location.host
+    <span class="hljs-keyword">if</span> (href.indexOf(origin) !== <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span>
+
+    <span class="hljs-comment">/* We are in business: prevent the browser from leaving the page, */</span>
+    <span class="hljs-comment">/* and -- if the link has changed -- push the new location to the */</span>
+    <span class="hljs-comment">/* browser's history */</span>
+    e.preventDefault()
+    <span class="hljs-keyword">if</span> (href !== location.href) {
+      <span class="hljs-built_in">window</span>.history.pushState({}, <span class="hljs-string">''</span>, href)
+      locationUpdatedCallback(location, e)
+    }
+  })
+
+  <span class="hljs-comment">/* Make sure the passed callback is called when the history changes. The */</span>
+  <span class="hljs-comment">/* pushState call above will indeed make this happen */</span>
+  <span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'popstate'</span>, e =&gt; locationUpdatedCallback(<span class="hljs-built_in">window</span>.location, e))
+
+  <span class="hljs-comment">/* Artificially call the callback at installation time. This is important so that */</span>
+  <span class="hljs-comment">/* developers using this function can do one-off setups  */</span>
+  locationUpdatedCallback(<span class="hljs-built_in">window</span>.location, <span class="hljs-literal">null</span>)
+}</pre></div>
+            
+          
+            
+            <p>The <code>installRouter()</code> function makes sure that the correct callback is called
+whenever a user clicks on a link.</p>
+<p>Changing the location programmatically with <code>window.history.pushState()</code> or
+<code>window.history.replaceState()</code> won’t trigger the update callback – which
+means that routing won’t respond.
+In order to change location programmatically, after <code>pushState()</code> or <code>replaceState()</code>
+an SPA needs using routify.js will need to manually emit a <code>popstate</code>
+event. This function does just that:</p>
+
+            
+              <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">emitPopstate</span> (<span class="hljs-params">state</span>) </span>{
+  <span class="hljs-keyword">const</span> e = <span class="hljs-keyword">new</span> PopStateEvent(<span class="hljs-string">'popstate'</span>, { state })
+  <span class="hljs-built_in">window</span>.dispatchEvent(e)
+}</pre></div>
+            
+          
+            
+            <h3 id="location-matching">Location matching</h3>
+
+            
+          
+            
+            <p>This is a simple function that will</p>
+
+            
+              <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">locationMatch</span> (<span class="hljs-params">templateUrl, checker</span>) </span>{
+  <span class="hljs-keyword">if</span> (!templateUrl) <span class="hljs-keyword">return</span>
+  <span class="hljs-keyword">const</span> locationMatchExecutor = <span class="hljs-function">(<span class="hljs-params">templateUrl, checker</span>) =&gt;</span> {</pre></div>
+            
+          
+            
+            <p>Prepare the basic variables</p>
+
+            
+              <div class='highlight'><pre>    <span class="hljs-keyword">const</span> templateUrlObject = <span class="hljs-keyword">new</span> URL(templateUrl, <span class="hljs-string">'http://localhost/'</span>)
+    <span class="hljs-keyword">const</span> templatePath = templateUrlObject.pathname.split(<span class="hljs-string">'/'</span>)
+    <span class="hljs-keyword">const</span> browserUrlObject = <span class="hljs-built_in">window</span>.location
+    <span class="hljs-keyword">const</span> browserPath = browserUrlObject.pathname.split(<span class="hljs-string">'/'</span>)</pre></div>
+            
+          
+            
+            <p>Check the hash – if present or marked as “must be empty”</p>
+
+            
+              <div class='highlight'><pre>    <span class="hljs-keyword">const</span> templateHash = (templateUrlObject.hash || <span class="hljs-string">'#'</span>).substr(<span class="hljs-number">1</span>)
+    <span class="hljs-keyword">const</span> browserHash = (browserUrlObject.hash || <span class="hljs-string">'#'</span>).substr(<span class="hljs-number">1</span>)
+    <span class="hljs-keyword">const</span> templateHashEmpty = templateUrl.endsWith(<span class="hljs-string">'#'</span>)
+    <span class="hljs-keyword">let</span> hashMatching = <span class="hljs-literal">true</span>
+    <span class="hljs-keyword">if</span> (templateHash || templateHashEmpty) {
+      <span class="hljs-keyword">if</span> (templateHashEmpty &amp;&amp; browserHash) hashMatching = <span class="hljs-literal">false</span>
+      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (templateHash === <span class="hljs-string">'*'</span> &amp;&amp; browserHash) hashMatching = <span class="hljs-literal">true</span>
+      <span class="hljs-keyword">else</span> hashMatching = templateHash === browserHash
+    }
+    <span class="hljs-keyword">if</span> (!hashMatching) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span></pre></div>
+            
+          
+            
+            <p>Check the callbacks</p>
+
+            
+              <div class='highlight'><pre>    <span class="hljs-keyword">const</span> callbackParams = {}
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>, l = templatePath.length; i &lt; l; i++) {
+      <span class="hljs-keyword">if</span> (templatePath[i].startsWith(<span class="hljs-string">':'</span>)) {
+        callbackParams[templatePath[i].substr(<span class="hljs-number">1</span>)] = browserPath[i]
+      } <span class="hljs-keyword">else</span> {</pre></div>
+            
+          
+            
+            <p>If the template accepts anything, and the browser has something,
+skip the next check</p>
+
+            
+              <div class='highlight'><pre>        <span class="hljs-keyword">if</span> (templatePath[i] === <span class="hljs-string">'*'</span> &amp;&amp; browserPath[i]) <span class="hljs-keyword">continue</span>
+
+        <span class="hljs-keyword">if</span> (templatePath[i] !== browserPath[i]) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+      }
+    }</pre></div>
+            
+          
+            
+            <p>No param checker: return true, since parameters won’t need checking</p>
+
+            
+              <div class='highlight'><pre>    <span class="hljs-keyword">if</span> (!checker) <span class="hljs-keyword">return</span> callbackParams</pre></div>
+            
+          
+            
+            <p>Checker is there: if it passes, return the found params. Otherwise, fail</p>
+
+            
+              <div class='highlight'><pre>    <span class="hljs-keyword">if</span> (checker(callbackParams)) <span class="hljs-keyword">return</span> callbackParams
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+  }
+
+  <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">Array</span>.isArray(templateUrl)) <span class="hljs-keyword">return</span> locationMatchExecutor(templateUrl, checker)
+  <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> templateUrlElement <span class="hljs-keyword">of</span> templateUrl) {
+      <span class="hljs-keyword">const</span> r = locationMatchExecutor(templateUrlElement, checker)
+      <span class="hljs-keyword">if</span> (r) <span class="hljs-keyword">return</span> r
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+  }
+}</pre></div>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="bottombar">
+
+    </div>
+  </div>
+</body>
+</html>
