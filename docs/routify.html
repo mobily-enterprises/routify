@@ -89,9 +89,9 @@
         <div class="contentPage">
           
             
-            <p>routify is an unintrusive module that deals with routing and fallback
+            <p>routify.js is an unintrusive module that deals with routing and fallback
 management.
-In a nutshell, all routify does is set a specific attribute/property (<code>active</code>
+In a nutshell, all routify.js does is set a specific attribute/property (<code>active</code>
 by default) depending on whether an element satisfies a routing pattern
 (e.g. ‘/view-jobs/:id’). It will also run a callback</p>
 <h2 id="modules-variables">Module’s variables</h2>
@@ -99,7 +99,7 @@ by default) depending on whether an element satisfies a routing pattern
             
           
             
-            <p>routify uses some variables common to all functions: the list of
+            <p>routify.js uses some variables common to all functions: the list of
 observed elements (<code>elements</code>), a flag to know if the <code>installRouter</code> was
 already called (<code>routerInstalled</code>) and a default fallback element (<code>fallback</code>)</p>
 
@@ -116,7 +116,7 @@ already called (<code>routerInstalled</code>) and a default fallback element (<c
             
           
             
-            <p>routify can be configured by the <code>setConfig</code> function, which will set
+            <p>routify.js can be configured by the <code>setConfig</code> function, which will set
 keys for the module variable <code>config</code>. The configuration defines
 what attribute and property are used for:</p>
 <ul>
@@ -144,7 +144,7 @@ what attribute and property are used for:</p>
             
           
             
-            <p>An element can be configured for routify in several different ways: via
+            <p>An element can be configured for routify.js in several different ways: via
 attributes, properties or constructors’ properties.
 For example the path an element will depend on for activation can be specified
 using:</p>
@@ -187,7 +187,7 @@ of the configuration options wherever they are.</p>
             
           
             
-            <p>The heart of routify is the <code>registerRoute()</code> function, which is used to
+            <p>The heart of routify.js is the <code>registerRoute()</code> function, which is used to
 add an element to the list of routing” elements.</p>
 <p>To understand what <code>registerRoute()</code> does, it’s important to first understand
 what <code>activateCurrentPath()</code> and <code>maybeActivateElement()</code> do.</p>
@@ -302,7 +302,7 @@ is installed. In the second part, the element is actually registered.</p>
             
           
             
-            <p>In order for Routify to work, it needs to intercept mouse clicks so that
+            <p>In order for routify.js to work, it needs to intercept mouse clicks so that
 rather than changing page (and triggering a full reload), a callback
 is called. This is achieved by the <code>installRoute</code> function, <em>strongly</em> inspired
 by the <code>routing.js</code> file in the <code>pwa-helpers</code> package by the Polymer team.

@@ -1,15 +1,15 @@
 // Routify's source code
 // ======================
 //
-// routify is an unintrusive module that deals with routing and fallback
+// routify.js is an unintrusive module that deals with routing and fallback
 // management.
-// In a nutshell, all routify does is set a specific attribute/property (`active`
+// In a nutshell, all routify.js does is set a specific attribute/property (`active`
 // by default) depending on whether an element satisfies a routing pattern
 // (e.g. '/view-jobs/:id'). It will also run a callback
 
 // ## Module's variables
 //
-// routify uses some variables common to all functions: the list of
+// routify.js uses some variables common to all functions: the list of
 // observed elements (`elements`), a flag to know if the `installRouter` was
 // already called (`routerInstalled`) and a default fallback element (`fallback`)
 
@@ -20,7 +20,7 @@ let activeElement = null
 
 // ## Configuration options and helpers
 //
-// routify can be configured by the `setConfig` function, which will set
+// routify.js can be configured by the `setConfig` function, which will set
 // keys for the module variable `config`. The configuration defines
 // what attribute and property are used for:
 // * elements' active flag
@@ -45,7 +45,7 @@ const config = {
 }
 export const setConfig = (key, value) => { config[key] = value }
 
-// An element can be configured for routify in several different ways: via
+// An element can be configured for routify.js in several different ways: via
 // attributes, properties or constructors' properties.
 // For example the path an element will depend on for activation can be specified
 // using:
@@ -84,7 +84,7 @@ export function getDisableActivationFromEl (el) {
 
 // ## Registration and activation of elements
 //
-// The heart of routify is the `registerRoute()` function, which is used to
+// The heart of routify.js is the `registerRoute()` function, which is used to
 // add an element to the list of routing" elements.
 //
 // To understand what `registerRoute()` does, it's important to first understand
@@ -187,7 +187,7 @@ const toggleElementActive = (el, active) => {
 //
 // ## The first part
 //
-// In order for Routify to work, it needs to intercept mouse clicks so that
+// In order for routify.js to work, it needs to intercept mouse clicks so that
 // rather than changing page (and triggering a full reload), a callback
 // is called. This is achieved by the `installRoute` function, _strongly_ inspired
 // by the `routing.js` file in the `pwa-helpers` package by the Polymer team.
