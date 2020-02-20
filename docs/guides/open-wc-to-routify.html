@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+
+<html>
+<head>
+  <title>Standard open-wc project to a routing-aware app in 6 steps</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="../tpe.css" />
+</head>
+<body>
+  <div class="container">
+      <div class="header">
+        <div class="topbar">
+          <div id="logo" alt="TPE">
+          </div>
+          <h3>Standard open-wc project to a routing-aware app in 6 steps</h3>
+          <!-- <img id="logo" src="/images/TPE_logo_white.png" height="60px" alt="TPE" > -->
+          <div class="links">
+            <a href="https://github.com/mobily-enterprises/tpe" target="_blank" title="View on GitHub">
+              <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub icon</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            </a>
+          </div>
+        </div>
+
+      </div>
+      <div class="main">
+        
+          <div class="toc">
+            <ul>
+              
+                
+                
+                  <li>
+                      <a class="source " href="../index.html">
+                          index
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source " href="../api.html">
+                          api
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source  current " href="../guides.html">
+                          guides
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source  indented  current " href="open-wc-to-routify.html">
+                          open wc to routify
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source  indented " href="straight-html.html">
+                          straight html
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source " href="../routify.html">
+                          routify.js
+                      </a>
+                  </li>
+                
+              
+            </ul>
+          </div>
+        
+        <div class="contentPage">
+          
+            
+            <p>routify.js was thought with <a href="https://open-wc.org/">open-wc</a> in mind.</p>
+<p>Open-wc is a fantastic project; however, it’s very agnostic in terms of routing, and it’s basic project doesn’t provide proper routing.
+This guide will fix that.</p>
+<p>First of all, create a new open-wc project:</p>
+<pre><code>$ npm init @open-wc</code></pre><p>And pick “Scaffold a new project” &gt; “Application”. Don’t pick any of the extra options (Linting, Testing, Demoing, Building) and call it <code>routing-app</code>. Finish it off by creating the directory structure, and installing the npm components.
+You can do the same thing by running:</p>
+<pre><code>n$ pm init @open-wc --destinationPath /home/merc/Development/test/routing-app --type scaffold --scaffoldType app --features  --tagName routing-app --writeToDisk true --installDependencies npm      </code></pre><p>Start the app with the usual <code>npm start</code>.</p>
+<p>Now, let’s get to work.</p>
+<h2 id="step-1-install-routifyjs">Step 1: Install routify.js</h2>
+
+            
+          
+            
+            <p>First of all, install routify.js from npm:</p>
+<pre><code>$ npm install routify</code></pre><h2 id="step-2-routify-your-main-component">Step 2: Routify your main component</h2>
+
+            
+          
+            
+            <p>You are ready to make the real changes.</p>
+<p>Open the file <code>components/routing-app/src/RoutingApp.js</code>.  This is the entry point of your application, and it needs to become aware of routing.
+To do that, add this to the top:</p>
+<pre><code>import { MainPageMixin } from &#39;routify/lit/MainPageMixin.js&#39;</code></pre><p>And change the class declaration into:</p>
+<pre><code>export class RoutingApp extends MainPageMixin(LitElement) {</code></pre><p>This change alone will ensure that clicking on links from now on will not trigger a page reload.</p>
+<p>Add this to the CSS:</p>
+<pre><code>   .page:not([active]) {
+<span class="hljs-code">     display: none;</span>
+   }
+
+   .page[active] {
+<span class="hljs-code">     display: block;</span>
+   }</code></pre><p>This CSS code will ensure that only active pages are actually displayed.</p>
+<p>It’s now time to change the links at the top. Rather than linking to hash anchors, they will link to proper URLs:</p>
+<pre><code><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/main"</span>&gt;</span></span>
+  Main
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/page-one"</span>&gt;</span></span>
+  Page One
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/page-about"</span>&gt;</span></span>
+  About
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
+
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/wrong-link"</span>&gt;</span></span>
+  Wrong link
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span></code></pre><p>Please note that there is also an extra “wrong link” in the mix. This will be used later to test the fallback.</p>
+<p>You can now delete the functions <code>__navClicked()</code> and <code>__navClass()</code> which are no longer used.</p>
+<p>The default version of the file will call <code>_renderPage()</code> which will render a different section of the file depending on <code>this.page</code> – which was set by the now deleted <code>__navClicked()</code> function. It’s now time to delete <code>${this._renderPage()}</code> and have this in its place:</p>
+<pre><code><span class="hljs-code">     &lt;page-main class="page" .logo=${openWcLogo}&gt;&lt;/page-main&gt;</span>
+<span class="hljs-code">     &lt;page-one class="page"&gt;&lt;/page-one&gt;</span>
+<span class="hljs-code">     &lt;page-about class="page" page-path="/page-about"&gt;${templateAbout}&lt;/page-about&gt;</span>
+<span class="hljs-code">     &lt;page-fallback class="page" fallback&gt;&lt;p&gt;Page not found try going to &lt;a href="/main"&gt;Main&lt;/a&gt;&lt;/p&gt;&lt;/page-fallback&gt;</span></code></pre><p>Also, delete the <code>_renderPage()</code> function which is now useless.</p>
+<p>Note that:</p>
+<ul>
+<li><p><code>page-about</code> is a normal HTML element, not a lit-element one. So, its path is defined in the <code>page-path</code> attribute. <code>page-main</code> and <code>page-one</code> will define their paths in the component class.</p>
+</li>
+<li><p>The <code>page-fallback</code> element is also a normal HTML element, and has the <code>fallback</code> attribute set it in.</p>
+</li>
+</ul>
+<p>You will see that RouterApp is still running in the browser. However, none of the pages are displaying since all of them are assigned the class <code>page</code> and becase of the added CSS rule pages of <code>page</code> class will only display if they have the <code>active</code> attribute – and none of them do.</p>
+<p>It’s time to change that.</p>
+<h2 id="step-3-routify-the-lit-element-pages">Step 3: Routify the lit-element pages</h2>
+
+            
+          
+            
+            <p>This is the easiest step. It involves small changes to the lit-element pages.</p>
+<h3 id="change-pagemain">Change PageMain</h3>
+
+            
+          
+            
+            <p>Open the file <code>components/page-main/src/PageMain.js</code>. Some small changes will make this page routing-aware – that is, it will add the <code>active</code> attribute to itself if the browser’s location matches its path.</p>
+<p>Add this to the top:</p>
+<pre><code>import { MainPageMixin } from &#39;routify/lit/RoutingPageMixin.js&#39;</code></pre><p>And change the class declaration into:</p>
+<pre><code>export class PageMain extends RoutingPageMixin(LitElement) {</code></pre><p>Finally, make the element aware of its paths by adding this line:</p>
+<pre><code>static get pagePath () { return [&#39;/&#39;, &#39;/main&#39;] }</code></pre><p>That’s it: loading the app in the browser now, you will see that this element will display when the location is either <code>/</code> or <code>/main</code>. Again, there is no magic: all the element does is set (and unset) its <code>active</code> attribute depending on the browser’s location.</p>
+<h3 id="change-pageone">Change PageOne</h3>
+
+            
+          
+            
+            <p>Changes to PageOne are nearly identical Open the file <code>components/page-main/src/PageMain.js</code>.</p>
+<p>Add this to the top:</p>
+<pre><code>import { MainPageMixin } from &#39;routify/lit/RoutingPageMixin.js&#39;</code></pre><p>And change the class declaration into:</p>
+<pre><code>export class PageOne extends RoutingPageMixin(LitElement) {</code></pre><p>Finally, make the element aware of its paths by adding this line:</p>
+<pre><code>static get pagePath () { return &#39;page-one&#39; }</code></pre><p>That’s it.</p>
+<h3 id="it-works">It works!</h3>
+
+            
+          
+            
+            <p>Loading the app in the browser now, you will see that both the main page and “Page one” will work fine.</p>
+<h2 id="step-4-routify-the-last-remaining-plain-elements">Step 4: Routify the last remaining (plain) elements</h2>
+
+            
+          
+            
+            <p>The About page is still not functional. Also, when clicking on the “Wrong link” at the top, nothing shows. The reason is obvious: the <code>active</code> attribute is off, and there is nothing to turn them on.</p>
+<p>Routify needs to be made aware of these two pages manually. There are two ways to do that, and they both involve changing <code>components/routing-app/src/RoutingApp.js</code> (the app’s main page).</p>
+<p>1) Set a <code>routifySelector</code> in the main page.</p>
+<p>Just add this to your main page:</p>
+<pre><code>static get routifySelector () { return &#39;.page&#39; }</code></pre><p>This will make sure that every element satisfying the selector <code>.page</code> will become active if their route matches.</p>
+<p>2) Alternatively, you can set the elements by hand by adding this to your <code>firstUpdated()</code> hook of the main page:</p>
+<pre><code>import { registerRoute } from &#39;routify/routify.js&#39;
+
+firstUpdated () {
+  super.firstUpdated()
+  registerRoute(this.shadowRoot.querySelector(&#39;page-about&#39;))
+  registerRoute(this.shadowRoot.querySelector(&#39;page-fallback&#39;))
+}</code></pre><p>They are equivalent.</p>
+<h2 id="step-5-party">Step 5: Party!</h2>
+
+            
+          
+            
+            
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="bottombar">
+
+    </div>
+  </div>
+</body>
+</html>

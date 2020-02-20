@@ -59,17 +59,8 @@
                 
                 
                   <li>
-                      <a class="source  indented " href="guides/lit-element.html">
-                          lit element
-                      </a>
-                  </li>
-                
-              
-                
-                
-                  <li>
-                      <a class="source  indented " href="guides/openwc-to-routify.html">
-                          openwc to routify
+                      <a class="source  indented " href="guides/open-wc-to-routify.html">
+                          open wc to routify
                       </a>
                   </li>
                 
@@ -237,8 +228,8 @@ callback – skiping any of the activation logic.</p>
 
   <span class="hljs-comment">/* Detour: activation is disabled. Just run the callback if present */</span>
   <span class="hljs-comment">/* and just return false, since item wasn't activated */</span>
-  <span class="hljs-keyword">if</span> (activationDisabled &amp;&amp; isActiveWithParams &amp;&amp; el[config.routerCallbackProperty]) {
-    el[config.routerCallbackProperty](isActiveWithParams, location, <span class="hljs-literal">null</span>)
+  <span class="hljs-keyword">if</span> (activationDisabled &amp;&amp; isActiveWithParams) {
+    <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, location, <span class="hljs-literal">null</span>)
     <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
   }
 

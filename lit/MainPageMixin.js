@@ -10,7 +10,7 @@ export const MainPageMixin = (base) => {
 
     static get pagePath () { return '/:page' }
     static get disableActivation () { return true }
-    static get routifySelector () { return '.page' }
+    // static get routifySelector () { return '.page' }
 
     constructor () {
       super()
