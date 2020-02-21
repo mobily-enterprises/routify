@@ -82,6 +82,12 @@ export function getDisableActivationFromEl (el) {
          false
 }
 
+export function getActiveFromEl (el) {
+  return el.getAttribute(config.activeAttribute) !== null ||
+         el[config.activeProperty] ||
+         false
+}
+
 // ## Registration and activation of elements
 //
 // The heart of routify.js is the `registerRoute()` function, which is used to
@@ -130,14 +136,19 @@ const maybeActivateElement = function (el) {
     return false
   }
 
-  /* Toggle the active property/attribute */
-  toggleElementActive(el, !!isActiveWithParams)
+  /* If the active status has changed, then toggle to new state */
+  /* If not, there is no point in doing it */
+  if ( !!getActiveFromEl(el) !== !!isActiveWithParams) {
 
-  /* If active, call the callback (if present) AND set the element as "the"
-  /* currently active  element */
-  if (isActiveWithParams) {
-    if (el[config.routerCallbackProperty] && el !== activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, null)
-    if (!activationDisabled) activeElement = el
+    /* Toggle the active property/attribute */
+    toggleElementActive(el, !!isActiveWithParams)
+
+    /* If active, call the callback (if present) AND set the element as "the"
+    /* currently active  element */
+    if (isActiveWithParams) {
+      if (el[config.routerCallbackProperty] && el !== activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, null)
+      if (!activationDisabled) activeElement = el
+    }
   }
 
   /* Return true or false, depending on the element being active or not */
