@@ -169,7 +169,13 @@ of the configuration options wherever they are.</p>
 
             
               <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">pagePathFromEl</span> (<span class="hljs-params">el</span>) </span>{
-  <span class="hljs-keyword">return</span> el.getAttribute(config.pathAttribute) ||
+  <span class="hljs-keyword">const</span> toArray = <span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> {
+    <span class="hljs-keyword">return</span> (!p || !(p.indexOf(<span class="hljs-string">' '</span>) &gt;= <span class="hljs-number">0</span>))
+      ? p
+      : p.split(<span class="hljs-string">' '</span>)
+  }
+
+  <span class="hljs-keyword">return</span> toArray(el.getAttribute(config.pathAttribute)) ||
          el[config.pathProperty] ||
          el.constructor[config.pathProperty] ||
          <span class="hljs-literal">false</span>
@@ -232,13 +238,14 @@ callback – skiping any of the activation logic.</p>
               <div class='highlight'><pre><span class="hljs-keyword">const</span> maybeActivateElement = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">el</span>) </span>{
   <span class="hljs-keyword">const</span> path = pagePathFromEl(el)
 
+  <span class="hljs-keyword">const</span> activationDisabled = getDisableActivationFromEl(el)
+
   <span class="hljs-comment">/* No path, no setting nor unsetting of `active` */</span>
-  <span class="hljs-keyword">if</span> (!path &amp;&amp; el !== fallback) {
+  <span class="hljs-keyword">if</span> (!path &amp;&amp; el !== fallback &amp;&amp; !activationDisabled) {
     <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'Routing element does not have a path:'</span>, el)
     <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
   }
 
-  <span class="hljs-keyword">const</span> activationDisabled = getDisableActivationFromEl(el)
   <span class="hljs-keyword">const</span> isActiveWithParams = locationMatch(path)
 
   <span class="hljs-comment">/* Detour: activation is disabled. Just run the callback if present */</span>
@@ -248,8 +255,6 @@ callback – skiping any of the activation logic.</p>
     <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
   }
 
-  <span class="hljs-comment">/* If the active status has changed, then toggle to new state */</span>
-  <span class="hljs-comment">/* If not, there is no point in doing it */</span>
   <span class="hljs-keyword">if</span> (!!isActiveWithParams !== getActiveFromEl(el)) {
     <span class="hljs-comment">/* Toggle the active property/attribute */</span>
     toggleElementActive(el, !!isActiveWithParams)
