@@ -1,3 +1,23 @@
 # routify.js API
 
-TODO
+**registerRoutesFromSelector (root, selector)**
+**registerRoute (el)**
+
+**setConfig (key, value)**
+  activeAttribute: 'active',
+  activeProperty: 'active',
+  pathAttribute: 'page-path',
+  pathProperty: 'pagePath',
+  fallbackAttribute: 'fallback',
+  fallbackProperty: 'fallback',
+  disableActivationAttribute: 'disable-activation',
+  disableActivationProperty: 'disableActivation',
+  routerCallbackProperty: 'routerCallback'
+
+**pagePathFromEl (el)**
+**getFallbackFromEl (el)**  
+**getDisableActivationFromEl (el)**  
+**getActiveFromEl (el)**
+
+**emitPopstate (state)**
+**locationMatch (templateUrl, checker)**
