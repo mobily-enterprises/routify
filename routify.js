@@ -62,7 +62,13 @@ export const setConfig = (key, value) => { config[key] = value }
 // of the configuration options wherever they are.
 
 export function pagePathFromEl (el) {
-  return el.getAttribute(config.pathAttribute) ||
+  const toArray = p => {
+    return (!p || !(p.indexOf(' ') >= 0))
+      ? p
+      : p.split(' ')
+  }
+
+  return toArray(el.getAttribute(config.pathAttribute)) ||
          el[config.pathProperty] ||
          el.constructor[config.pathProperty] ||
          false
@@ -120,13 +126,14 @@ export function getActiveFromEl (el) {
 const maybeActivateElement = function (el) {
   const path = pagePathFromEl(el)
 
+  const activationDisabled = getDisableActivationFromEl(el)
+
   /* No path, no setting nor unsetting of `active` */
-  if (!path && el !== fallback) {
+  if (!path && el !== fallback && !activationDisabled) {
     console.error('Routing element does not have a path:', el)
     return false
   }
 
-  const activationDisabled = getDisableActivationFromEl(el)
   const isActiveWithParams = locationMatch(path)
 
   /* Detour: activation is disabled. Just run the callback if present */
@@ -136,8 +143,6 @@ const maybeActivateElement = function (el) {
     return false
   }
 
-  /* If the active status has changed, then toggle to new state */
-  /* If not, there is no point in doing it */
   if (!!isActiveWithParams !== getActiveFromEl(el)) {
     /* Toggle the active property/attribute */
     toggleElementActive(el, !!isActiveWithParams)
