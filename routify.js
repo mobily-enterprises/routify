@@ -138,18 +138,19 @@ const maybeActivateElement = function (el) {
 
   /* If the active status has changed, then toggle to new state */
   /* If not, there is no point in doing it */
-  if ( !!getActiveFromEl(el) !== !!isActiveWithParams) {
-
+  if (!!isActiveWithParams !== getActiveFromEl(el)) {
     /* Toggle the active property/attribute */
     toggleElementActive(el, !!isActiveWithParams)
-
-    /* If active, call the callback (if present) AND set the element as "the"
-    /* currently active  element */
-    if (isActiveWithParams) {
-      if (el[config.routerCallbackProperty] && el !== activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, null)
-      if (!activationDisabled) activeElement = el
-    }
   }
+
+  if (el[config.routerCallbackProperty] && el !== activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, null)
+
+  /* If active, call the callback (if present) AND set the element as "the"
+  /* currently active  element */
+  if (isActiveWithParams) {
+    if (!activationDisabled) activeElement = el
+  }
+
 
   /* Return true or false, depending on the element being active or not */
   return !!isActiveWithParams
@@ -169,6 +170,7 @@ const activateCurrentPath = (e) => {
   for (const el of elements) {
     const isActive = maybeActivateElement(el)
     oneActive = oneActive || isActive
+    activeElement = isActive ? el : null
   }
   if (fallback) {
     const fallbackActive = !oneActive
@@ -332,6 +334,8 @@ export function locationMatch (templateUrl, checker) {
     const templatePath = templateUrlObject.pathname.split('/')
     const browserUrlObject = window.location
     const browserPath = browserUrlObject.pathname.split('/')
+
+    if (templatePath.length !== browserPath.length) return false
 
     // Check the hash -- if present or marked as "must be empty"
     const templateHash = (templateUrlObject.hash || '#').substr(1)
