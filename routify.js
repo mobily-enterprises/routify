@@ -151,7 +151,6 @@ const maybeActivateElement = function (el) {
     if (!activationDisabled) activeElement = el
   }
 
-
   /* Return true or false, depending on the element being active or not */
   return !!isActiveWithParams
 }
