@@ -12,7 +12,7 @@ First of all, create a new open-wc project:
 And pick "Scaffold a new project" > "Application". Don't pick any of the extra options (Linting, Testing, Demoing, Building) and call it `routing-app`. Finish it off by creating the directory structure, and installing the npm components.
 You can do the same thing by running:
 
-    n$ pm init @open-wc --destinationPath /home/merc/Development/test/routing-app --type scaffold --scaffoldType app --features  --tagName routing-app --writeToDisk true --installDependencies npm      
+    $ npm init @open-wc --destinationPath /home/merc/Development/test/routing-app --type scaffold --scaffoldType app --features  --tagName routing-app --writeToDisk true --installDependencies npm      
 
 Start the app with the usual `npm start`.
 
@@ -78,7 +78,7 @@ Please note that there is also an extra "wrong link" in the mix. This will be us
 
 You can now delete the functions `__navClicked()` and `__navClass()` which are no longer used.
 
-The default version of the file will call `_renderPage()` which will render a different section of the file depending on `this.page` -- which was set by the now deleted `__navClicked()` function. It's now time to delete `${this._renderPage()}` and have this in its place:
+The default version of the file calls `_renderPage()` which renders a different section of the file depending on `this.page` -- which was set by the now deleted `__navClicked()` function. It's now time to delete `${this._renderPage()}` and have this in its place:
 
          <page-main class="page" .logo=${openWcLogo}></page-main>
          <page-one class="page"></page-one>
@@ -90,10 +90,9 @@ Also, delete the `_renderPage()` function which is now useless.
 Note that:
 
 * `page-about` is a normal HTML element, not a lit-element one. So, its path is defined in the `page-path` attribute. `page-main` and `page-one` will define their paths in the component class.
-
 * The `page-fallback` element is also a normal HTML element, and has the `fallback` attribute set it in.
 
-You will see that RouterApp is still running in the browser. However, none of the pages are displaying since all of them are assigned the class `page` and becase of the added CSS rule pages of `page` class will only display if they have the `active` attribute -- and none of them do.
+You will see that RouterApp is still running in the browser. However, none of the pages are displaying: since all of them are assigned the class `page`, the added CSS rule pages of `page` class will only display if they have the `active` attribute (and none of them do).
 
 It's time to change that.
 
