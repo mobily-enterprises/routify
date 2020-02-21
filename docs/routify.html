@@ -187,6 +187,12 @@ of the configuration options wherever they are.</p>
          el[config.disableActivationProperty] ||
          el.constructor[config.disableActivationProperty] ||
          <span class="hljs-literal">false</span>
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getActiveFromEl</span> (<span class="hljs-params">el</span>) </span>{
+  <span class="hljs-keyword">return</span> el.getAttribute(config.activeAttribute) !== <span class="hljs-literal">null</span> ||
+         el[config.activeProperty] ||
+         <span class="hljs-literal">false</span>
 }</pre></div>
             
           
@@ -245,12 +251,14 @@ callback – skiping any of the activation logic.</p>
   <span class="hljs-comment">/* Toggle the active property/attribute */</span>
   toggleElementActive(el, !!isActiveWithParams)
 
+  <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty] &amp;&amp; el !== activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, <span class="hljs-literal">null</span>)
+
   <span class="hljs-comment">/* If active, call the callback (if present) AND set the element as "the"
   /* currently active  element */</span>
   <span class="hljs-keyword">if</span> (isActiveWithParams) {
-    <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty] &amp;&amp; el !== activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, <span class="hljs-literal">null</span>)
     <span class="hljs-keyword">if</span> (!activationDisabled) activeElement = el
   }
+
 
   <span class="hljs-comment">/* Return true or false, depending on the element being active or not */</span>
   <span class="hljs-keyword">return</span> !!isActiveWithParams
@@ -273,6 +281,7 @@ no active elements were found.</p>
   <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> el <span class="hljs-keyword">of</span> elements) {
     <span class="hljs-keyword">const</span> isActive = maybeActivateElement(el)
     oneActive = oneActive || isActive
+    activeElement = isActive ? el : <span class="hljs-literal">null</span>
   }
   <span class="hljs-keyword">if</span> (fallback) {
     <span class="hljs-keyword">const</span> fallbackActive = !oneActive
@@ -458,7 +467,9 @@ event. This function does just that:</p>
               <div class='highlight'><pre>    <span class="hljs-keyword">const</span> templateUrlObject = <span class="hljs-keyword">new</span> URL(templateUrl, <span class="hljs-string">'http://localhost/'</span>)
     <span class="hljs-keyword">const</span> templatePath = templateUrlObject.pathname.split(<span class="hljs-string">'/'</span>)
     <span class="hljs-keyword">const</span> browserUrlObject = <span class="hljs-built_in">window</span>.location
-    <span class="hljs-keyword">const</span> browserPath = browserUrlObject.pathname.split(<span class="hljs-string">'/'</span>)</pre></div>
+    <span class="hljs-keyword">const</span> browserPath = browserUrlObject.pathname.split(<span class="hljs-string">'/'</span>)
+
+    <span class="hljs-keyword">if</span> (templatePath.length !== browserPath.length) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span></pre></div>
             
           
             

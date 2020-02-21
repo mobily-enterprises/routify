@@ -104,7 +104,7 @@ This guide will fix that.</p>
 <p>First of all, create a new open-wc project:</p>
 <pre><code>$ npm init @open-wc</code></pre><p>And pick “Scaffold a new project” &gt; “Application”. Don’t pick any of the extra options (Linting, Testing, Demoing, Building) and call it <code>routing-app</code>. Finish it off by creating the directory structure, and installing the npm components.
 You can do the same thing by running:</p>
-<pre><code>n$ pm init @open-wc --destinationPath /home/merc/Development/test/routing-app --type scaffold --scaffoldType app --features  --tagName routing-app --writeToDisk true --installDependencies npm      </code></pre><p>Start the app with the usual <code>npm start</code>.</p>
+<pre><code>$ npm init @open-wc --destinationPath /home/merc/Development/test/routing-app --type scaffold --scaffoldType app --features  --tagName routing-app --writeToDisk true --installDependencies npm      </code></pre><p>Start the app with the usual <code>npm start</code>.</p>
 <p>Now, let’s get to work.</p>
 <h2 id="step-1-install-routifyjs">Step 1: Install routify.js</h2>
 
@@ -151,19 +151,17 @@ To do that, add this to the top:</p>
 <span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
 <span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span></code></pre><p>Please note that there is also an extra “wrong link” in the mix. This will be used later to test the fallback.</p>
 <p>You can now delete the functions <code>__navClicked()</code> and <code>__navClass()</code> which are no longer used.</p>
-<p>The default version of the file will call <code>_renderPage()</code> which will render a different section of the file depending on <code>this.page</code> – which was set by the now deleted <code>__navClicked()</code> function. It’s now time to delete <code>${this._renderPage()}</code> and have this in its place:</p>
+<p>The default version of the file calls <code>_renderPage()</code> which renders a different section of the file depending on <code>this.page</code> – which was set by the now deleted <code>__navClicked()</code> function. It’s now time to delete <code>${this._renderPage()}</code> and have this in its place:</p>
 <pre><code><span class="hljs-code">     &lt;page-main class="page" .logo=${openWcLogo}&gt;&lt;/page-main&gt;</span>
 <span class="hljs-code">     &lt;page-one class="page"&gt;&lt;/page-one&gt;</span>
 <span class="hljs-code">     &lt;page-about class="page" page-path="/page-about"&gt;${templateAbout}&lt;/page-about&gt;</span>
 <span class="hljs-code">     &lt;page-fallback class="page" fallback&gt;&lt;p&gt;Page not found try going to &lt;a href="/main"&gt;Main&lt;/a&gt;&lt;/p&gt;&lt;/page-fallback&gt;</span></code></pre><p>Also, delete the <code>_renderPage()</code> function which is now useless.</p>
 <p>Note that:</p>
 <ul>
-<li><p><code>page-about</code> is a normal HTML element, not a lit-element one. So, its path is defined in the <code>page-path</code> attribute. <code>page-main</code> and <code>page-one</code> will define their paths in the component class.</p>
-</li>
-<li><p>The <code>page-fallback</code> element is also a normal HTML element, and has the <code>fallback</code> attribute set it in.</p>
-</li>
+<li><code>page-about</code> is a normal HTML element, not a lit-element one. So, its path is defined in the <code>page-path</code> attribute. <code>page-main</code> and <code>page-one</code> will define their paths in the component class.</li>
+<li>The <code>page-fallback</code> element is also a normal HTML element, and has the <code>fallback</code> attribute set it in.</li>
 </ul>
-<p>You will see that RouterApp is still running in the browser. However, none of the pages are displaying since all of them are assigned the class <code>page</code> and becase of the added CSS rule pages of <code>page</code> class will only display if they have the <code>active</code> attribute – and none of them do.</p>
+<p>You will see that RouterApp is still running in the browser. However, none of the pages are displaying: since all of them are assigned the class <code>page</code>, the added CSS rule pages of <code>page</code> class will only display if they have the <code>active</code> attribute (and none of them do).</p>
 <p>It’s time to change that.</p>
 <h2 id="step-3-routify-the-lit-element-pages">Step 3: Routify the lit-element pages</h2>
 

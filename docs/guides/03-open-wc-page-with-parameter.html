@@ -98,8 +98,52 @@
         <div class="contentPage">
           
             
-            <p>This guide build from the previous one, <a href="02-open-wc-to-routify.html">Standard open-wc project to a routing-aware app in 6 steps</a>.</p>
+            <p>This guide build from the previous one, <a href="02-open-wc-to-routify.html">Standard open-wc project to a routing-aware app in 6 steps</a>. To start this guide, make sure that you have a working version of the routing-app from the previous guide.</p>
 <p>The aim is to create a page with a parameter. This is a very common pattern in applications.</p>
+<p>To do this, the component <code>page-one</code> will be modified.</p>
+<h2 id="changes-to-page-one">Changes to page-one</h2>
+
+            
+          
+            
+            <p>First of all, the URL page-one responds to must change to <code>/page-one/:id</code>:</p>
+<pre><code>static get pagePath () { return &#39;/page-one/:id&#39; }</code></pre><p>The <code>id</code> should be added as a property for the page:</p>
+<pre><code>static get properties() {
+  return {
+<span class="hljs-code">    title: { type: String },</span>
+<span class="hljs-code">    counter: { type: Number },</span>
+<span class="hljs-code">    id: { type: Number } // NEW property added</span>
+  };
+}</code></pre><p>Finally, a <code>routerCallback()</code> is also defined. This function will change the <code>id</code> property defined above with the routing’s <code>id</code> parameter.</p>
+<pre><code>routerCallback (params) {
+  this.id = params.id
+}</code></pre><p>Finally, it’s useful to add some visual feedback to the page so that you can see that the <code>id</code> property is set. This is easily done by adding this code to <code>render()</code>:</p>
+<pre><code><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span></span>URL parameter: ${this.id}<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span></span></code></pre><p>That’s it: the <code>page-one</code> page now needs a parameter, and it’s able to use it.</p>
+<h2 id="changes-to-routing-app">Changes to routing-app</h2>
+
+            
+          
+            
+            <p>In order to test page-one out, a few changes to the main app are necessary.</p>
+<p>First of all, change the link to <code>page-one</code> into:</p>
+<pre><code><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span></span>
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/page-one/30"</span> ?<span class="hljs-attr">selected</span>=<span class="hljs-string">"${this.page === 'page-one'}"</span>&gt;</span></span>
+<span class="hljs-code">    Page One</span>
+  <span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span></code></pre><p>Also, change the contents of the <code>page-about</code> element so that it has two links:</p>
+<pre><code><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">page-about</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"page"</span> <span class="hljs-attr">page-path</span>=<span class="hljs-string">"/page-about"</span>&gt;</span></span>
+  Link to id 40: <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"page-one/40"</span>&gt;</span></span>page-one/40<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
+  Link to page-one without id: <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"page-one"</span>&gt;</span></span>page-one<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
+  ${templateAbout}
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">page-about</span>&gt;</span></span></code></pre><p>Since routing-app now has more than simple 1-level routing, <code>pagePath</code> should also be changed to:</p>
+<pre><code><span class="hljs-code">    static get pagePath () { return ['/:page', '/:page/*'] }</span></code></pre><p>This will make sure that <code>/page-one/40</code> and <code>/page-one/30</code> (or any ID for that matter) will match; this will enable <code>routerCallback()</code> to be triggered, and <code>this.id</code> to be changed. Remember that this is just for the highlighting of the active link: the actual routing happens within each page.</p>
+<h2 id="conclusion">Conclusion</h2>
+
+            
+          
+            
+            <p>Each page is always responsible of its own routing. This delegates routing complexity to each element. Adding a parameter to a route is very simple.</p>
+<p>In a real-life example, when an element updates (via the <code>update()</code> callback), you would check whether the ID of the record displayed is the same as the element’s <code>id</code> property. If different, a database load might be triggered.</p>
 
             
           
