@@ -13,10 +13,8 @@
 // observed elements (`elements`), a flag to know if the `installRouter` was
 // already called (`routerInstalled`) and a default fallback element (`fallback`)
 
-const elements = []
+const elements = { default: { list: [], fallback: null, activeElement: null } }
 let routerInstalled = false
-let fallback = null
-let activeElement = null
 
 // ## Configuration options and helpers
 //
@@ -25,6 +23,7 @@ let activeElement = null
 // what attribute and property are used for:
 // * elements' active flag
 // * elements' paths
+// * elements' routing groups
 // * define an element as fallback
 // * disable activation for the element, used for the main page
 // * elements' callback functions
@@ -37,6 +36,8 @@ const config = {
   activeProperty: 'active',
   pathAttribute: 'page-path',
   pathProperty: 'pagePath',
+  routingGroupAttribute: 'routing-group',
+  routingGroupProperty: 'routingGroup',
   fallbackAttribute: 'fallback',
   fallbackProperty: 'fallback',
   disableActivationAttribute: 'disable-activation',
@@ -61,7 +62,7 @@ export const setConfig = (key, value) => { config[key] = value }
 // The following functions are helper functions to facilitate the fetching
 // of the configuration options wherever they are.
 
-export function pagePathFromEl (el) {
+export function getPagePathFromEl (el) {
   const toArray = p => {
     return (!p || !(p.indexOf(' ') >= 0))
       ? p
@@ -94,6 +95,12 @@ export function getActiveFromEl (el) {
          false
 }
 
+export function getRoutingGroupFromEl (el) {
+  return el.getAttribute(config.routingGroupAttribute) ||
+         el[config.routingGroupProperty] ||
+         'default'
+}
+
 // ## Registration and activation of elements
 //
 // The heart of routify.js is the `registerRoute()` function, which is used to
@@ -123,13 +130,14 @@ export function getActiveFromEl (el) {
 // This is achieved using the `disable-activation` attribute or `disableActivation`
 // property, which will cause the function to detour, and only run the
 // callback -- skiping any of the activation logic.
-const maybeActivateElement = function (el) {
-  const path = pagePathFromEl(el)
+const maybeActivateElement = function (el, e) {
+  const path = getPagePathFromEl(el)
+  const group = getRoutingGroupFromEl(el)
 
   const activationDisabled = getDisableActivationFromEl(el)
 
   /* No path, no setting nor unsetting of `active` */
-  if (!path && el !== fallback && !activationDisabled) {
+  if (!path && el !== elements[group].fallback && !activationDisabled) {
     console.error('Routing element does not have a path:', el)
     return false
   }
@@ -139,7 +147,7 @@ const maybeActivateElement = function (el) {
   /* Detour: activation is disabled. Just run the callback if present */
   /* and just return false, since item wasn't activated */
   if (activationDisabled && isActiveWithParams) {
-    if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, location, null)
+    if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, location, e)
     return false
   }
 
@@ -148,12 +156,12 @@ const maybeActivateElement = function (el) {
     toggleElementActive(el, !!isActiveWithParams)
   }
 
-  if (el[config.routerCallbackProperty] && el !== activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, null)
+  if (el[config.routerCallbackProperty] && el !== elements[group].activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, e)
 
   /* If active, call the callback (if present) AND set the element as "the"
   /* currently active  element */
   if (isActiveWithParams) {
-    if (!activationDisabled) activeElement = el
+    if (!activationDisabled) elements[group].activeElement = el
   }
 
   /* Return true or false, depending on the element being active or not */
@@ -167,19 +175,22 @@ const maybeActivateElement = function (el) {
 // no active elements were found.
 //
 const activateCurrentPath = (e) => {
-  if (!elements.length) return
+  for (const group of Object.keys(elements)) {
+    if (!elements[group].list.length) return
 
-  activeElement = null
-  let oneActive = false
-  for (const el of elements) {
-    const isActive = maybeActivateElement(el)
-    oneActive = oneActive || isActive
-    activeElement = isActive ? el : null
-  }
-  if (fallback) {
-    const fallbackActive = !oneActive
-    toggleElementActive(fallback, fallbackActive)
-    if (fallbackActive && fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty](location, null)
+    elements[group].activeElement = null
+    let oneActive = false
+    for (const el of elements[group].list) {
+      const isActive = maybeActivateElement(el, e)
+      oneActive = oneActive || isActive
+      elements[group].activeElement = isActive ? el : null
+    }
+    const fallback = elements[group].fallback
+    if (fallback) {
+      const fallbackActive = !oneActive
+      toggleElementActive(fallback, fallbackActive)
+      if (fallbackActive && fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty](location, e)
+    }
   }
 }
 
@@ -240,6 +251,11 @@ const toggleElementActive = (el, active) => {
 // mass-register all elements satisfying a specific selector.
 
 export function registerRoute (el) {
+  const group = getRoutingGroupFromEl(el)
+
+  /* Create the element group if it doesn't exist already */
+  if (!elements[group]) elements[group] = { list: [], fallback: null, activeElement: null }
+
   if (!routerInstalled) {
     installRouter(async (location, e) => {
       activateCurrentPath(e)
@@ -247,11 +263,11 @@ export function registerRoute (el) {
     routerInstalled = true
   }
 
-  if (!fallback && getFallbackFromEl(el)) fallback = el
-  elements.push(el)
+  if (!elements[group].fallback && getFallbackFromEl(el)) elements[group].fallback = el
+  elements[group].list.push(el)
 
-  if (!fallback) {
-    maybeActivateElement(el)
+  if (!elements[group].fallback) {
+    maybeActivateElement(el, null)
   } else {
     activateCurrentPath(null)
   }
@@ -259,7 +275,9 @@ export function registerRoute (el) {
 
 export function registerRoutesFromSelector (root, selector) {
   for (const el of root.querySelectorAll(selector)) {
-    if (!elements.find(item => item === el)) registerRoute(el)
+    const group = getRoutingGroupFromEl(el)
+    if (!elements[group]) elements[group] = { list: [], fallback: null, activeElement: null }
+    if (!elements[group].list.find(item => item === el)) registerRoute(el)
   }
 }
 

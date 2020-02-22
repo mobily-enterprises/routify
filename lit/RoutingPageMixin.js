@@ -1,4 +1,4 @@
-import { registerRoute, locationMatch, pagePathFromEl } from '../routify'
+import { registerRoute, locationMatch, getPagePathFromEl } from '../routify'
 
 export const RoutingPageMixin = (base) => {
   return class Base extends base {
@@ -20,7 +20,7 @@ export const RoutingPageMixin = (base) => {
     }
 
     locationMatch (checker) {
-      return locationMatch(pagePathFromEl(this), checker)
+      return locationMatch(getPagePathFromEl(this), checker)
     }
   }
 }
