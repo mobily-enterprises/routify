@@ -1,5 +1,7 @@
 # routify.js API
 
+API is not yet documented. Have a look at the [guides](guides.html) for now
+
 **registerRoutesFromSelector (root, selector)**
 
 **registerRoute (el)**
