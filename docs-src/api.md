@@ -18,8 +18,8 @@ routify.js allows routing groups; each group will have up to one possible active
 
 _The path template_
 
-The path template has two special characters: `*` and `:`. They will both match not-empty strings. The main difference is that when `routerCallback()` is called, for `:` routes the `params` object will have a corresponding `:key`.  For example if the location is `/record/10` and the template is
-`/record/:id`, this `routerCallback()` function will be called with parameters `{ id: 10 }`
+The path template has two special characters: `*` and `:`. They will both match not-empty strings. The main difference is that when `routerCallback()` is called, for each `:entry`  the `params` object will have a corresponding `entry`.  For example if the location is `/record/10` and the template is
+`/record/:id`, this `routerCallback(params)` function will be called with `params` equal to `{ id: 10 }`
 
 
 **unregisterRoute (el)**
@@ -28,11 +28,20 @@ It unregisters the element from the routing. This should be used before an eleme
 
 **registerRoutesFromSelector (root, selector)**
 
+It registers all entries found in the children of element `root` as long as they match the `selector`. The `querySelectorAll` method of the `root` element is used to execute the query.
+
 **unregisterRoutesFromSelector (root, selector)**
 
-
+It registers all entries found in the children of element `root` as long as they match the `selector`.
 
 **setConfig (key, value)**
+
+It sets the keys (attribute keys or property keys) used to function. For example, `setConfig('activeAttribute', 'selected')` will make sure that each active element (that is, an element that satisfies the routing) will have the `selected` attribute set.
+
+It's important to set alternate defaults _before_ registering elements.
+
+Here are the defaults:
+
   * activeAttribute: 'active',
   * activeProperty: 'active',
   * pathAttribute: 'page-path',
@@ -47,11 +56,16 @@ It unregisters the element from the routing. This should be used before an eleme
 
 **pagePathFromEl (el)**
 
+Returns the path associated to the element, checking the `pathAttribute`
+
 **getFallbackFromEl (el)**  
 
 **getDisableActivationFromEl (el)**  
 
 **getActiveFromEl (el)**
+
+**getRoutingGroupFromEl (el)**
+
 
 
 **emitPopstate (state)**
