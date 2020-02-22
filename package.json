@@ -2,7 +2,7 @@
   "name": "routify",
   "version": "1.0.9",
   "description": "The most powerful client-side routing in the west",
-  "main": "index.js",
+  "main": "roitify.js",
   "directories": {
     "doc": "docs"
   },
