@@ -34,8 +34,8 @@ let routerInstalled = false
 const config = {
   activeAttribute: 'active',
   activeProperty: 'active',
-  pathAttribute: 'page-path',
-  pathProperty: 'pagePath',
+  pagePathAttribute: 'page-path',
+  pagePathProperty: 'pagePath',
   routingGroupAttribute: 'routing-group',
   routingGroupProperty: 'routingGroup',
   fallbackAttribute: 'fallback',
@@ -69,9 +69,9 @@ export function getPagePathFromEl (el) {
       : p.split(' ')
   }
 
-  return toArray(el.getAttribute(config.pathAttribute)) ||
-         el[config.pathProperty] ||
-         el.constructor[config.pathProperty] ||
+  return toArray(el.getAttribute(config.pagePathAttribute)) ||
+         el[config.pagePathProperty] ||
+         el.constructor[config.pagePathProperty] ||
          false
 }
 

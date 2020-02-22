@@ -149,8 +149,8 @@ what attribute and property are used for:</p>
               <div class='highlight'><pre><span class="hljs-keyword">const</span> config = {
   <span class="hljs-attr">activeAttribute</span>: <span class="hljs-string">'active'</span>,
   <span class="hljs-attr">activeProperty</span>: <span class="hljs-string">'active'</span>,
-  <span class="hljs-attr">pathAttribute</span>: <span class="hljs-string">'page-path'</span>,
-  <span class="hljs-attr">pathProperty</span>: <span class="hljs-string">'pagePath'</span>,
+  <span class="hljs-attr">pagePathAttribute</span>: <span class="hljs-string">'page-path'</span>,
+  <span class="hljs-attr">pagePathProperty</span>: <span class="hljs-string">'pagePath'</span>,
   <span class="hljs-attr">routingGroupAttribute</span>: <span class="hljs-string">'routing-group'</span>,
   <span class="hljs-attr">routingGroupProperty</span>: <span class="hljs-string">'routingGroup'</span>,
   <span class="hljs-attr">fallbackAttribute</span>: <span class="hljs-string">'fallback'</span>,
@@ -185,9 +185,9 @@ of the configuration options wherever they are.</p>
       : p.split(<span class="hljs-string">' '</span>)
   }
 
-  <span class="hljs-keyword">return</span> toArray(el.getAttribute(config.pathAttribute)) ||
-         el[config.pathProperty] ||
-         el.constructor[config.pathProperty] ||
+  <span class="hljs-keyword">return</span> toArray(el.getAttribute(config.pagePathAttribute)) ||
+         el[config.pagePathProperty] ||
+         el.constructor[config.pagePathProperty] ||
          <span class="hljs-literal">false</span>
 }
 

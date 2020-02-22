@@ -44,8 +44,8 @@ Here are the defaults:
 
   * activeAttribute: 'active',
   * activeProperty: 'active',
-  * pathAttribute: 'page-path',
-  * pathProperty: 'pagePath',
+  * pagePathAttribute: 'page-path',
+  * pagePathProperty: 'pagePath',
   * routingGroupAttribute: 'routing-group',
   * routingGroupProperty: 'routingGroup',
   * fallbackAttribute: 'fallback',
@@ -54,9 +54,20 @@ Here are the defaults:
   * disableActivationProperty: 'disableActivation',
   * routerCallbackProperty: 'routerCallback'
 
-**pagePathFromEl (el)**
 
-Returns the path associated to the element, checking the `pathAttribute`
+**getPagePathFromEl (el)**
+
+Returns the path associated to the element, sourcing it from the attribute `page-path` (configurable by setting the config key `pagePathAttribute`), or the property `pagePathProperty` of the element or the element's constructor (configurable with config key `pagePathProperty`).
+
+When it's set as the property, it can be a single path or an array. If it's taken from the attribute, and there are several paths separated by spaces, it will return an array of the space-separated paths.
+
+This means that if an element is defined as:
+
+    <page-user page-path="/user /user/:id"></page-user>
+
+`getPagePathFromEl (el)` will return an array containing `['/user', 'user/:id']`.
+
+TODO: Give examples for property (single and array) and static getters
 
 **getFallbackFromEl (el)**  
 
@@ -65,6 +76,7 @@ Returns the path associated to the element, checking the `pathAttribute`
 **getActiveFromEl (el)**
 
 **getRoutingGroupFromEl (el)**
+
 
 
 

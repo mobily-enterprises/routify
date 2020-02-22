@@ -135,8 +135,8 @@ Once an element is registered, its <code>active</code> property <em>and</em> att
 <ul>
 <li>activeAttribute: ‘active’,</li>
 <li>activeProperty: ‘active’,</li>
-<li>pathAttribute: ‘page-path’,</li>
-<li>pathProperty: ‘pagePath’,</li>
+<li>pagePathAttribute: ‘page-path’,</li>
+<li>pagePathProperty: ‘pagePath’,</li>
 <li>routingGroupAttribute: ‘routing-group’,</li>
 <li>routingGroupProperty: ‘routingGroup’,</li>
 <li>fallbackAttribute: ‘fallback’,</li>
@@ -145,8 +145,12 @@ Once an element is registered, its <code>active</code> property <em>and</em> att
 <li>disableActivationProperty: ‘disableActivation’,</li>
 <li>routerCallbackProperty: ‘routerCallback’</li>
 </ul>
-<p><strong>pagePathFromEl (el)</strong></p>
-<p>Returns the path associated to the element, checking the <code>pathAttribute</code></p>
+<p><strong>getPagePathFromEl (el)</strong></p>
+<p>Returns the path associated to the element, sourcing it from the attribute <code>page-path</code> (configurable by setting the config key <code>pagePathAttribute</code>), or the property <code>pagePathProperty</code> of the element or the element’s constructor (configurable with config key <code>pagePathProperty</code>).</p>
+<p>When it’s set as the property, it can be a single path or an array. If it’s taken from the attribute, and there are several paths separated by spaces, it will return an array of the space-separated paths.</p>
+<p>This means that if an element is defined as:</p>
+<pre><code><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">page-user</span> <span class="hljs-attr">page-path</span>=<span class="hljs-string">"/user /user/:id"</span>&gt;</span></span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">page-user</span>&gt;</span></span></code></pre><p><code>getPagePathFromEl (el)</code> will return an array containing <code>[&#39;/user&#39;, &#39;user/:id&#39;]</code>.</p>
+<p>TODO: Give examples for property (single and array) and static getters</p>
 <p><strong>getFallbackFromEl (el)</strong>  </p>
 <p><strong>getDisableActivationFromEl (el)</strong>  </p>
 <p><strong>getActiveFromEl (el)</strong></p>
