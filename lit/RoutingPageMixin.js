@@ -1,4 +1,4 @@
-import { registerRoute, locationMatch, getPagePathFromEl } from '../routify'
+import { registerRoute, unregisterRoute, locationMatch, getPagePathFromEl } from '../routify'
 
 export const RoutingPageMixin = (base) => {
   return class Base extends base {
@@ -8,10 +8,14 @@ export const RoutingPageMixin = (base) => {
       }
     }
 
-    constructor () {
-      super()
-
+    connectedCallback () {
+      super.connectedCallback()
       registerRoute(this)
+    }
+
+    disconnectedCallback () {
+      super.connectedCallback()
+      unregisterRoute(this)
     }
 
     // Only render this page if it's actually visible.

@@ -1,16 +1,21 @@
-import { registerRoute, registerRoutesFromSelector } from '../routify'
+import { registerRoute, unregisterRoute, registerRoutesFromSelector, unregisterRoutesFromSelector } from '../routify'
 
 export const MainPageMixin = (base) => {
   return class Base extends base {
     static get disableActivation () { return true }
 
-    constructor () {
-      super()
-
+    connectedCallback () {
+      super.connectedCallback()
       registerRoute(this)
     }
 
-    firstUpdated () {
+    disconnectedCallback () {
+      super.connectedCallback()
+      unregisterRoute(this)
+      unregisterRoutesFromSelector(this.shadowRoot, this.constructor.routifySelector)
+    }
+
+    async firstUpdated () {
       super.firstUpdated()
 
       if (this.constructor.routifySelector) {

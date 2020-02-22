@@ -2,9 +2,15 @@
 
 API is not yet documented. Have a look at the [guides](guides.html) for now
 
+**registerRoute (el)**
+
+The element `el` is registered as a valid route.
+The 
+
 **registerRoutesFromSelector (root, selector)**
 
-**registerRoute (el)**
+
+
 
 **setConfig (key, value)**
   * activeAttribute: 'active',

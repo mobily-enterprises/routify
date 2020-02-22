@@ -192,6 +192,7 @@ const activateCurrentPath = (e) => {
       if (fallbackActive && fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty](location, e)
     }
   }
+  console.log(elements)
 }
 
 // Both the functions above use this simple helper that will toggle the `active`
@@ -281,6 +282,22 @@ export function registerRoutesFromSelector (root, selector) {
   }
 }
 
+export function unregisterRoute (el) {
+  const group = getRoutingGroupFromEl(el)
+
+  if (!elements[group]) return
+
+  elements[group].list = elements[group].list.filter(item => item !== el)
+}
+
+export function unregisterRoutesFromSelector (root, selector) {
+  for (const el of root.querySelectorAll(selector)) {
+    const group = getRoutingGroupFromEl(el)
+    if (!elements[group]) return
+    unregisterRoute(el)
+  }
+}
+
 // This function is _extremely_ inspired by the `installRouter` function found
 // in the [pwa-helpers](https://www.npmjs.com/package/pwa-helpers) package by
 // the Polymer team.
@@ -345,7 +362,28 @@ export function emitPopstate (state) {
 
 // ### Location matching
 //
-// This is a simple function that will
+// This is a simple function that will check if a template URL matches with
+// `window.location`.
+//
+// It's very basic, and it might eventually be replaced with something more
+// complex (although client-side routing doesn't tend to need complex
+// routing paths)
+//
+// The allowed syntax is:
+//
+// * `/something`
+// * `/something/:page`
+// * `/something/whatever/:page`
+// * `/something/*`
+// * `/something/:page/*`
+//
+// Both `*` and `:` character will match anything (as long as it's not empty).
+// The main difference is what the function returns: for `:` routes, if there is
+// a match, `locationMatch` will return an object where every key is the matching
+// `:key`.
+//
+// For example if the location is `/record/10` and the template is
+// `/record/:id`, this function will return `{ id: 10 }`
 //
 export function locationMatch (templateUrl, checker) {
   if (!templateUrl) return
