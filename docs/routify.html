@@ -268,7 +268,7 @@ callback – skiping any of the activation logic.</p>
   <span class="hljs-comment">/* Detour: activation is disabled. Just run the callback if present */</span>
   <span class="hljs-comment">/* and just return false, since item wasn't activated */</span>
   <span class="hljs-keyword">if</span> (activationDisabled &amp;&amp; isActiveWithParams) {
-    <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, location, e)
+    <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, e)
     <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
   }
 
@@ -277,10 +277,10 @@ callback – skiping any of the activation logic.</p>
     toggleElementActive(el, !!isActiveWithParams)
   }
 
-  <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty] &amp;&amp; el !== elements[group].activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, e)
+  <span class="hljs-comment">/* If active, call the callback (if present) */</span>
+  <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty] &amp;&amp; el !== elements[group].activeElement) el[config.routerCallbackProperty](isActiveWithParams, e)
 
-  <span class="hljs-comment">/* If active, call the callback (if present) AND set the element as "the"
-  /* currently active  element */</span>
+  <span class="hljs-comment">/* Set the element as "the" currently active  element */</span>
   <span class="hljs-keyword">if</span> (isActiveWithParams) {
     <span class="hljs-keyword">if</span> (!activationDisabled) elements[group].activeElement = el
   }
@@ -307,15 +307,15 @@ no active elements were found.</p>
     <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> el <span class="hljs-keyword">of</span> elements[group].list) {
       <span class="hljs-keyword">const</span> isActive = maybeActivateElement(el, e)
       oneActive = oneActive || isActive
-      elements[group].activeElement = isActive ? el : <span class="hljs-literal">null</span>
     }
     <span class="hljs-keyword">const</span> fallback = elements[group].fallback
     <span class="hljs-keyword">if</span> (fallback) {
       <span class="hljs-keyword">const</span> fallbackActive = !oneActive
       toggleElementActive(fallback, fallbackActive)
-      <span class="hljs-keyword">if</span> (fallbackActive &amp;&amp; fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty](location, e)
+      <span class="hljs-keyword">if</span> (fallbackActive &amp;&amp; fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty]({}, e)
     }
   }
+  <span class="hljs-built_in">console</span>.log(elements)
 }</pre></div>
             
           
@@ -411,6 +411,22 @@ mass-register all elements satisfying a specific selector.</p>
     <span class="hljs-keyword">if</span> (!elements[group]) elements[group] = { <span class="hljs-attr">list</span>: [], <span class="hljs-attr">fallback</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">activeElement</span>: <span class="hljs-literal">null</span> }
     <span class="hljs-keyword">if</span> (!elements[group].list.find(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item === el)) registerRoute(el)
   }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">unregisterRoute</span> (<span class="hljs-params">el</span>) </span>{
+  <span class="hljs-keyword">const</span> group = getRoutingGroupFromEl(el)
+
+  <span class="hljs-keyword">if</span> (!elements[group]) <span class="hljs-keyword">return</span>
+
+  elements[group].list = elements[group].list.filter(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item !== el)
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">unregisterRoutesFromSelector</span> (<span class="hljs-params">root, selector</span>) </span>{
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> el <span class="hljs-keyword">of</span> root.querySelectorAll(selector)) {
+    <span class="hljs-keyword">const</span> group = getRoutingGroupFromEl(el)
+    <span class="hljs-keyword">if</span> (!elements[group]) <span class="hljs-keyword">return</span>
+    unregisterRoute(el)
+  }
 }</pre></div>
             
           
@@ -487,7 +503,25 @@ event. This function does just that:</p>
             
           
             
-            <p>This is a simple function that will</p>
+            <p>This is a simple function that will check if a template URL matches with
+<code>window.location</code>.</p>
+<p>It’s very basic, and it might eventually be replaced with something more
+complex (although client-side routing doesn’t tend to need complex
+routing paths)</p>
+<p>The allowed syntax is:</p>
+<ul>
+<li><code>/something</code></li>
+<li><code>/something/:page</code></li>
+<li><code>/something/whatever/:page</code></li>
+<li><code>/something/*</code></li>
+<li><code>/something/:page/*</code></li>
+</ul>
+<p>Both <code>*</code> and <code>:</code> character will match anything (as long as it’s not empty).
+The main difference is what the function returns: for <code>:</code> routes, if there is
+a match, <code>locationMatch</code> will return an object where every key is the matching
+<code>:key</code>.</p>
+<p>For example if the location is <code>/record/10</code> and the template is
+<code>/record/:id</code>, this function will return <code>{ id: 10 }</code></p>
 
             
               <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">locationMatch</span> (<span class="hljs-params">templateUrl, checker</span>) </span>{

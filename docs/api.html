@@ -108,8 +108,24 @@
           
             
             <p>API is not yet documented. Have a look at the <a href="guides.html">guides</a> for now</p>
-<p><strong>registerRoutesFromSelector (root, selector)</strong></p>
 <p><strong>registerRoute (el)</strong></p>
+<p>The element <code>el</code> is registered as a valid route. The element’s route is set by the attribute <code>page-path</code> or property <code>pagePath</code>.
+Once an element is registered, its <code>active</code> property <em>and</em> attribute are set to true <strong>if</strong> the browser’s location matches the element’s path; there are two exceptions to this rule:</p>
+<ul>
+<li><p>if the element has the <code>disable-activation</code> attribute or the <code>disableActivation</code> property, the <code>active</code> property/attribute is untouched</p>
+</li>
+<li><p>if the element has the <code>fallback</code> attribute or property, the <code>active</code> property is turned on if the browser’s location <em>doesn’t</em> match the element’s path</p>
+</li>
+</ul>
+<p>When the browser’s location matches the element’s path (or, for fallback elements, when the browser’s location <em>doesn’t match</em> the element’s path), the element’s <code>routerCallback(params, e)</code> function is called, where <code>params</code> is an object with matching URL parameters and <code>e</code> is the click event that generated the change of location.</p>
+<p>routify.js allows routing groups; each group will have up to one possible active element, and one different fallback; this allows applications to have several levels of routing; for example, one main application group with pages with routes <code>/one</code>, <code>/two</code>, <code>/three</code> and another group with <code>/one/a</code>, <code>/one/b</code>, and <code>/one/c</code>. The default routing group is called <code>default</code>. In order to assign an element to a default group, the attribute <code>routing-group</code> or the property <code>routingGroup</code> can be set.</p>
+<p><em>The path template</em></p>
+<p>The path template has two special characters: <code>*</code> and <code>:</code>. They will both match not-empty strings. The main difference is that when <code>routerCallback()</code> is called, for <code>:</code> routes the <code>params</code> object will have a corresponding <code>:key</code>.  For example if the location is <code>/record/10</code> and the template is
+<code>/record/:id</code>, this <code>routerCallback()</code> function will be called with parameters <code>{ id: 10 }</code></p>
+<p><strong>unregisterRoute (el)</strong></p>
+<p>It unregisters the element from the routing. This should be used before an element is deleted.</p>
+<p><strong>registerRoutesFromSelector (root, selector)</strong></p>
+<p><strong>unregisterRoutesFromSelector (root, selector)</strong></p>
 <p><strong>setConfig (key, value)</strong></p>
 <ul>
 <li>activeAttribute: ‘active’,</li>

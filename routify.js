@@ -147,7 +147,7 @@ const maybeActivateElement = function (el, e) {
   /* Detour: activation is disabled. Just run the callback if present */
   /* and just return false, since item wasn't activated */
   if (activationDisabled && isActiveWithParams) {
-    if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, location, e)
+    if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, e)
     return false
   }
 
@@ -157,7 +157,7 @@ const maybeActivateElement = function (el, e) {
   }
 
   /* If active, call the callback (if present) */
-  if (el[config.routerCallbackProperty] && el !== elements[group].activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, e)
+  if (el[config.routerCallbackProperty] && el !== elements[group].activeElement) el[config.routerCallbackProperty](isActiveWithParams, e)
 
   /* Set the element as "the" currently active  element */
   if (isActiveWithParams) {
@@ -188,7 +188,7 @@ const activateCurrentPath = (e) => {
     if (fallback) {
       const fallbackActive = !oneActive
       toggleElementActive(fallback, fallbackActive)
-      if (fallbackActive && fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty](location, e)
+      if (fallbackActive && fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty]({}, e)
     }
   }
   console.log(elements)
