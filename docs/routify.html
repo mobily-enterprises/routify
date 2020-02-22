@@ -191,30 +191,30 @@ of the configuration options wherever they are.</p>
          <span class="hljs-literal">false</span>
 }
 
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRoutingGroupFromEl</span> (<span class="hljs-params">el</span>) </span>{
+  <span class="hljs-keyword">return</span> el.getAttribute(config.routingGroupAttribute) ||
+         el[config.routingGroupProperty] ||
+         <span class="hljs-string">'default'</span>
+}
+
 <span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getFallbackFromEl</span> (<span class="hljs-params">el</span>) </span>{
-  <span class="hljs-keyword">return</span> el.getAttribute(config.fallbackAttribute) !== <span class="hljs-literal">null</span> ||
+  <span class="hljs-keyword">return</span> el.hasAttribute(config.fallbackAttribute) ||
          el[config.fallbackProperty] ||
          el.constructor[config.fallbackProperty] ||
          <span class="hljs-literal">false</span>
 }
 
 <span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDisableActivationFromEl</span> (<span class="hljs-params">el</span>) </span>{
-  <span class="hljs-keyword">return</span> el.getAttribute(config.disableActivationAttribute) !== <span class="hljs-literal">null</span> ||
+  <span class="hljs-keyword">return</span> el.hasAttribute(config.disableActivationAttribute) ||
          el[config.disableActivationProperty] ||
          el.constructor[config.disableActivationProperty] ||
          <span class="hljs-literal">false</span>
 }
 
 <span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getActiveFromEl</span> (<span class="hljs-params">el</span>) </span>{
-  <span class="hljs-keyword">return</span> el.getAttribute(config.activeAttribute) !== <span class="hljs-literal">null</span> ||
+  <span class="hljs-keyword">return</span> el.hasAttribute(config.activeAttribute) ||
          el[config.activeProperty] ||
          <span class="hljs-literal">false</span>
-}
-
-<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRoutingGroupFromEl</span> (<span class="hljs-params">el</span>) </span>{
-  <span class="hljs-keyword">return</span> el.getAttribute(config.routingGroupAttribute) ||
-         el[config.routingGroupProperty] ||
-         <span class="hljs-string">'default'</span>
 }</pre></div>
             
           

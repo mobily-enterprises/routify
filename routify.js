@@ -75,30 +75,30 @@ export function getPagePathFromEl (el) {
          false
 }
 
+export function getRoutingGroupFromEl (el) {
+  return el.getAttribute(config.routingGroupAttribute) ||
+         el[config.routingGroupProperty] ||
+         'default'
+}
+
 export function getFallbackFromEl (el) {
-  return el.getAttribute(config.fallbackAttribute) !== null ||
+  return el.hasAttribute(config.fallbackAttribute) ||
          el[config.fallbackProperty] ||
          el.constructor[config.fallbackProperty] ||
          false
 }
 
 export function getDisableActivationFromEl (el) {
-  return el.getAttribute(config.disableActivationAttribute) !== null ||
+  return el.hasAttribute(config.disableActivationAttribute) ||
          el[config.disableActivationProperty] ||
          el.constructor[config.disableActivationProperty] ||
          false
 }
 
 export function getActiveFromEl (el) {
-  return el.getAttribute(config.activeAttribute) !== null ||
+  return el.hasAttribute(config.activeAttribute) ||
          el[config.activeProperty] ||
          false
-}
-
-export function getRoutingGroupFromEl (el) {
-  return el.getAttribute(config.routingGroupAttribute) ||
-         el[config.routingGroupProperty] ||
-         'default'
 }
 
 // ## Registration and activation of elements
