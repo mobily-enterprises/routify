@@ -1,8 +1,5 @@
 # routify.js API
 
-API is not yet documented. Have a look at the [guides](guides.html) for now
-
-
 **registerRoute (el)**
 
 The element `el` is registered as a valid route. The element's route is set by the attribute `page-path` or property `pagePath`.
