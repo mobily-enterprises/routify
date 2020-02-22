@@ -156,10 +156,10 @@ const maybeActivateElement = function (el, e) {
     toggleElementActive(el, !!isActiveWithParams)
   }
 
+  /* If active, call the callback (if present) */
   if (el[config.routerCallbackProperty] && el !== elements[group].activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, e)
 
-  /* If active, call the callback (if present) AND set the element as "the"
-  /* currently active  element */
+  /* Set the element as "the" currently active  element */
   if (isActiveWithParams) {
     if (!activationDisabled) elements[group].activeElement = el
   }
@@ -183,7 +183,6 @@ const activateCurrentPath = (e) => {
     for (const el of elements[group].list) {
       const isActive = maybeActivateElement(el, e)
       oneActive = oneActive || isActive
-      elements[group].activeElement = isActive ? el : null
     }
     const fallback = elements[group].fallback
     if (fallback) {
