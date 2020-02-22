@@ -14,7 +14,7 @@ export const RoutingPageMixin = (base) => {
     }
 
     disconnectedCallback () {
-      super.connectedCallback()
+      super.disconnectedCallback()
       unregisterRoute(this)
     }
 

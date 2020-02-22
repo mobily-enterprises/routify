@@ -1,4 +1,4 @@
-import { registerRoute, unregisterRoute, registerRoutesFromSelector, unregisterRoutesFromSelector } from '../routify'
+import { locationMatch, getPagePathFromEl, registerRoute, unregisterRoute, registerRoutesFromSelector, unregisterRoutesFromSelector } from '../routify'
 
 export const MainPageMixin = (base) => {
   return class Base extends base {
@@ -10,17 +10,21 @@ export const MainPageMixin = (base) => {
     }
 
     disconnectedCallback () {
-      super.connectedCallback()
+      super.disconnectedCallback()
       unregisterRoute(this)
       unregisterRoutesFromSelector(this.shadowRoot, this.constructor.routifySelector)
     }
 
-    async firstUpdated () {
+    firstUpdated () {
       super.firstUpdated()
 
       if (this.constructor.routifySelector) {
         registerRoutesFromSelector(this.shadowRoot, this.constructor.routifySelector)
       }
+    }
+
+    locationMatch (checker) {
+      return locationMatch(getPagePathFromEl(this), checker)
     }
   }
 }
