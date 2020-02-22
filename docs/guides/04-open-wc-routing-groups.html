@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+
+<html>
+<head>
+  <title>Sub routes (or routing groups) with routify.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="../tpe.css" />
+</head>
+<body>
+  <div class="container">
+      <div class="header">
+        <div class="topbar">
+          <div id="logo" alt="TPE">
+          </div>
+          <h3>Sub routes (or routing groups) with routify.js</h3>
+          <!-- <img id="logo" src="/images/TPE_logo_white.png" height="60px" alt="TPE" > -->
+          <div class="links">
+            <a href="https://github.com/mobily-enterprises/routify" target="_blank" title="View on GitHub">
+              <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub icon</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            </a>
+          </div>
+        </div>
+
+      </div>
+      <div class="main">
+        
+          <div class="toc">
+            <ul>
+              
+                
+                
+                  <li>
+                      <a class="source " href="../index.html">
+                          index
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source " href="../api.html">
+                          api
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source  current " href="../guides.html">
+                          guides
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source  indented " href="01-straight-html.html">
+                          01 straight html
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source  indented " href="02-open-wc-to-routify.html">
+                          02 open wc to routify
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source  indented " href="03-open-wc-page-with-parameter.html">
+                          03 open wc page with parameter
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source  indented  current " href="04-open-wc-routing-groups.html">
+                          04 open wc routing groups
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
+                      <a class="source " href="../routify.html">
+                          routify.js
+                      </a>
+                  </li>
+                
+              
+            </ul>
+          </div>
+        
+        <div class="contentPage">
+          
+            
+            <p>This guide build from a previous one, <a href="02-open-wc-to-routify.html">Standard open-wc project to a routing-aware app in 6 steps</a>. To start this guide, make sure that you have a working version of the routing-app from the previous guide.</p>
+<p>The aim is to create routing-aware sub-pages. This is a very common pattern in applications.</p>
+<p>To do this, the component <code>routing-app</code> will be modified.</p>
+<h2 id="routing-groups">Routing groups</h2>
+
+            
+          
+            
+            <p>routify.js supports routing groups. Up to this point, there was a list of pages (<code>page-main</code>, <code>page-one</code>, etc) and one fallback page which became active if none of the pages were active.</p>
+<p>By default, pages belong to the <code>default</code> group. A fallback is activated if none of the pages in that group are active. Having different routing groups means that two different pages in two different groups may become active, and that each group gets a separate fallback page</p>
+<h2 id="changes-to-routing-app">Changes to routing-app</h2>
+
+            
+          
+            
+            <p>To show how to create a different group, the <code>page-about</code> page will be turned into a multi-tab page; each tab has a different route, and the page has its own fallback.</p>
+<p>Doing this is surprisingly simple: the only thing to do is add a link bar to the about page, and add different pages making sure that each one belongs to the same <code>routing-group</code>.</p>
+<p>So, the about page – which was originally this:</p>
+<pre><code><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">page-about</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"page"</span> <span class="hljs-attr">page-path</span>=<span class="hljs-string">"/page-about"</span>&gt;</span></span>${templateAbout}<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">page-about</span>&gt;</span></span></code></pre><p>Becomes:</p>
+<pre><code><span class="hljs-code">    &lt;page-about class="page" page-path="/page-about /page-about/:aboutSubpage"&gt;</span>
+
+<span class="hljs-code">      &lt;header&gt;</span>
+<span class="hljs-code">        &lt;ul&gt;</span>
+
+<span class="hljs-code">          &lt;li&gt;</span>
+<span class="hljs-code">            &lt;a href="/page-about/one"&gt;</span>
+<span class="hljs-code">              About -&gt;  One</span>
+<span class="hljs-code">            &lt;/a&gt;</span>
+<span class="hljs-code">          &lt;/li&gt;</span>
+<span class="hljs-code">          &lt;li&gt;</span>
+<span class="hljs-code">            &lt;a href="/page-about/two"&gt;</span>
+<span class="hljs-code">              About -&gt; Two</span>
+<span class="hljs-code">            &lt;/a&gt;</span>
+<span class="hljs-code">          &lt;/li&gt;</span>
+<span class="hljs-code">          &lt;li&gt;</span>
+<span class="hljs-code">            &lt;a href="/page-about/wrong-link"&gt;</span>
+<span class="hljs-code">              About -&gt; Wrong</span>
+<span class="hljs-code">            &lt;/a&gt;</span>
+<span class="hljs-code">          &lt;/li&gt;</span>
+<span class="hljs-code">        &lt;/ul&gt;</span>
+<span class="hljs-code">      &lt;/header&gt;</span>
+
+<span class="hljs-code">      &lt;about-one class="page" page-path="/page-about /page-about/one" routing-group="about"&gt;</span>
+<span class="hljs-code">        &lt;h1&gt;About ONE&lt;/h1&gt;</span>
+<span class="hljs-code">      &lt;/about-one&gt;</span>
+
+<span class="hljs-code">      &lt;about-two class="page" page-path="/page-about/two" routing-group="about"&gt;</span>
+<span class="hljs-code">        &lt;h1&gt;About TWO&lt;/h1&gt;</span>
+<span class="hljs-code">      &lt;/about-two&gt;</span>
+
+<span class="hljs-code">      &lt;about-fallback class="page" fallback routing-group="about"&gt;</span>
+<span class="hljs-code">        &lt;h1&gt;About FALLBACK&lt;/h1&gt;</span>
+<span class="hljs-code">      &lt;/about-fallback&gt;</span>
+
+
+<span class="hljs-code">    &lt;/page-about&gt;</span></code></pre><p>The only other modification, is the <code>pagePath</code> property of <code>routing-app</code> that needs to become:</p>
+<pre><code><span class="hljs-code">    static get pagePath () { return ['/:page', '/:page/*'] }</span></code></pre><p>This is to make sure that when selecting one of sub-routes , the <code>about</code> link is shown as selected.</p>
+<h2 id="conclusion">Conclusion</h2>
+
+            
+          
+            
+            <p>In this guide, the about links are not marked as <code>selected</code>. This is because <code>page-about</code> is a simple HTML element with no implemented logic. If <code>page-about</code> were a component, it would be trivial to mix it in with <code>MainPageMixin</code> and implement the <code>routerCallback()</code> function to assign <code>this.aboutSubpage</code> to <code>params.aboutSubpage</code>, as it happens in <code>RoutingApp.js</code></p>
+
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="bottombar">
+
+    </div>
+  </div>
+</body>
+</html>

@@ -141,10 +141,10 @@ export class RoutingApp extends MainPageMixin(LitElement) {
       </header>
 
       <main>
-          <page-main class="page" .logo=${openWcLogo}></page-main>
-          <page-one class="page"></page-one>
-          <page-about class="page" page-path="/page-about">${templateAbout}</page-about>
-          <page-fallback class="page" fallback><p>Page not found try going to <a href="/main">Main</a></p></page-fallback>
+        <page-main class="page" .logo=${openWcLogo}></page-main>
+        <page-one class="page"></page-one>
+        <page-about class="page" page-path="/page-about">${templateAbout}</page-about>
+        <page-fallback class="page" fallback><p>Page not found try going to <a href="/main">Main</a></p></page-fallback>
       </main>
 
       <p class="app-footer">

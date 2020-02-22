@@ -1,6 +1,6 @@
 # A page with a parameter in an open-wc project
 
-This guide build from the previous one, [Standard open-wc project to a routing-aware app in 6 steps](02-open-wc-to-routify.html). To start this guide, make sure that you have a working version of the routing-app from the previous guide.
+This guide build from a previous one, [Standard open-wc project to a routing-aware app in 6 steps](02-open-wc-to-routify.html). To start this guide, make sure that you have a working version of the routing-app from the previous guide.
 
 The aim is to create a page with a parameter. This is a very common pattern in applications.
 

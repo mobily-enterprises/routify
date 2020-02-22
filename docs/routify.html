@@ -86,6 +86,15 @@
                 
                 
                   <li>
+                      <a class="source  indented " href="guides/04-open-wc-routing-groups.html">
+                          04 open wc routing groups
+                      </a>
+                  </li>
+                
+              
+                
+                
+                  <li>
                       <a class="source  current " href="routify.html">
                           routify.js
                       </a>
@@ -113,10 +122,8 @@ observed elements (<code>elements</code>), a flag to know if the <code>installRo
 already called (<code>routerInstalled</code>) and a default fallback element (<code>fallback</code>)</p>
 
             
-              <div class='highlight'><pre><span class="hljs-keyword">const</span> elements = []
-<span class="hljs-keyword">let</span> routerInstalled = <span class="hljs-literal">false</span>
-<span class="hljs-keyword">let</span> fallback = <span class="hljs-literal">null</span>
-<span class="hljs-keyword">let</span> activeElement = <span class="hljs-literal">null</span></pre></div>
+              <div class='highlight'><pre><span class="hljs-keyword">const</span> elements = { <span class="hljs-attr">default</span>: { <span class="hljs-attr">list</span>: [], <span class="hljs-attr">fallback</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">activeElement</span>: <span class="hljs-literal">null</span> } }
+<span class="hljs-keyword">let</span> routerInstalled = <span class="hljs-literal">false</span></pre></div>
             
           
             
@@ -131,6 +138,7 @@ what attribute and property are used for:</p>
 <ul>
 <li>elements’ active flag</li>
 <li>elements’ paths</li>
+<li>elements’ routing groups</li>
 <li>define an element as fallback</li>
 <li>disable activation for the element, used for the main page</li>
 <li>elements’ callback functions</li>
@@ -143,6 +151,8 @@ what attribute and property are used for:</p>
   <span class="hljs-attr">activeProperty</span>: <span class="hljs-string">'active'</span>,
   <span class="hljs-attr">pathAttribute</span>: <span class="hljs-string">'page-path'</span>,
   <span class="hljs-attr">pathProperty</span>: <span class="hljs-string">'pagePath'</span>,
+  <span class="hljs-attr">routingGroupAttribute</span>: <span class="hljs-string">'routing-group'</span>,
+  <span class="hljs-attr">routingGroupProperty</span>: <span class="hljs-string">'routingGroup'</span>,
   <span class="hljs-attr">fallbackAttribute</span>: <span class="hljs-string">'fallback'</span>,
   <span class="hljs-attr">fallbackProperty</span>: <span class="hljs-string">'fallback'</span>,
   <span class="hljs-attr">disableActivationAttribute</span>: <span class="hljs-string">'disable-activation'</span>,
@@ -168,7 +178,7 @@ class definitions:<pre><code><span class="hljs-keyword">static</span> <span clas
 of the configuration options wherever they are.</p>
 
             
-              <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">pagePathFromEl</span> (<span class="hljs-params">el</span>) </span>{
+              <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getPagePathFromEl</span> (<span class="hljs-params">el</span>) </span>{
   <span class="hljs-keyword">const</span> toArray = <span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> {
     <span class="hljs-keyword">return</span> (!p || !(p.indexOf(<span class="hljs-string">' '</span>) &gt;= <span class="hljs-number">0</span>))
       ? p
@@ -199,6 +209,12 @@ of the configuration options wherever they are.</p>
   <span class="hljs-keyword">return</span> el.getAttribute(config.activeAttribute) !== <span class="hljs-literal">null</span> ||
          el[config.activeProperty] ||
          <span class="hljs-literal">false</span>
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRoutingGroupFromEl</span> (<span class="hljs-params">el</span>) </span>{
+  <span class="hljs-keyword">return</span> el.getAttribute(config.routingGroupAttribute) ||
+         el[config.routingGroupProperty] ||
+         <span class="hljs-string">'default'</span>
 }</pre></div>
             
           
@@ -235,13 +251,14 @@ property, which will cause the function to detour, and only run the
 callback – skiping any of the activation logic.</p>
 
             
-              <div class='highlight'><pre><span class="hljs-keyword">const</span> maybeActivateElement = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">el</span>) </span>{
-  <span class="hljs-keyword">const</span> path = pagePathFromEl(el)
+              <div class='highlight'><pre><span class="hljs-keyword">const</span> maybeActivateElement = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">el, e</span>) </span>{
+  <span class="hljs-keyword">const</span> path = getPagePathFromEl(el)
+  <span class="hljs-keyword">const</span> group = getRoutingGroupFromEl(el)
 
   <span class="hljs-keyword">const</span> activationDisabled = getDisableActivationFromEl(el)
 
   <span class="hljs-comment">/* No path, no setting nor unsetting of `active` */</span>
-  <span class="hljs-keyword">if</span> (!path &amp;&amp; el !== fallback &amp;&amp; !activationDisabled) {
+  <span class="hljs-keyword">if</span> (!path &amp;&amp; el !== elements[group].fallback &amp;&amp; !activationDisabled) {
     <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'Routing element does not have a path:'</span>, el)
     <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
   }
@@ -251,7 +268,7 @@ callback – skiping any of the activation logic.</p>
   <span class="hljs-comment">/* Detour: activation is disabled. Just run the callback if present */</span>
   <span class="hljs-comment">/* and just return false, since item wasn't activated */</span>
   <span class="hljs-keyword">if</span> (activationDisabled &amp;&amp; isActiveWithParams) {
-    <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, location, <span class="hljs-literal">null</span>)
+    <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, location, e)
     <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
   }
 
@@ -260,12 +277,12 @@ callback – skiping any of the activation logic.</p>
     toggleElementActive(el, !!isActiveWithParams)
   }
 
-  <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty] &amp;&amp; el !== activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, <span class="hljs-literal">null</span>)
+  <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty] &amp;&amp; el !== elements[group].activeElement) el[config.routerCallbackProperty](isActiveWithParams, location, e)
 
   <span class="hljs-comment">/* If active, call the callback (if present) AND set the element as "the"
   /* currently active  element */</span>
   <span class="hljs-keyword">if</span> (isActiveWithParams) {
-    <span class="hljs-keyword">if</span> (!activationDisabled) activeElement = el
+    <span class="hljs-keyword">if</span> (!activationDisabled) elements[group].activeElement = el
   }
 
   <span class="hljs-comment">/* Return true or false, depending on the element being active or not */</span>
@@ -282,19 +299,22 @@ no active elements were found.</p>
 
             
               <div class='highlight'><pre><span class="hljs-keyword">const</span> activateCurrentPath = <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> {
-  <span class="hljs-keyword">if</span> (!elements.length) <span class="hljs-keyword">return</span>
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> group <span class="hljs-keyword">of</span> <span class="hljs-built_in">Object</span>.keys(elements)) {
+    <span class="hljs-keyword">if</span> (!elements[group].list.length) <span class="hljs-keyword">return</span>
 
-  activeElement = <span class="hljs-literal">null</span>
-  <span class="hljs-keyword">let</span> oneActive = <span class="hljs-literal">false</span>
-  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> el <span class="hljs-keyword">of</span> elements) {
-    <span class="hljs-keyword">const</span> isActive = maybeActivateElement(el)
-    oneActive = oneActive || isActive
-    activeElement = isActive ? el : <span class="hljs-literal">null</span>
-  }
-  <span class="hljs-keyword">if</span> (fallback) {
-    <span class="hljs-keyword">const</span> fallbackActive = !oneActive
-    toggleElementActive(fallback, fallbackActive)
-    <span class="hljs-keyword">if</span> (fallbackActive &amp;&amp; fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty](location, <span class="hljs-literal">null</span>)
+    elements[group].activeElement = <span class="hljs-literal">null</span>
+    <span class="hljs-keyword">let</span> oneActive = <span class="hljs-literal">false</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> el <span class="hljs-keyword">of</span> elements[group].list) {
+      <span class="hljs-keyword">const</span> isActive = maybeActivateElement(el, e)
+      oneActive = oneActive || isActive
+      elements[group].activeElement = isActive ? el : <span class="hljs-literal">null</span>
+    }
+    <span class="hljs-keyword">const</span> fallback = elements[group].fallback
+    <span class="hljs-keyword">if</span> (fallback) {
+      <span class="hljs-keyword">const</span> fallbackActive = !oneActive
+      toggleElementActive(fallback, fallbackActive)
+      <span class="hljs-keyword">if</span> (fallbackActive &amp;&amp; fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty](location, e)
+    }
   }
 }</pre></div>
             
@@ -363,6 +383,11 @@ mass-register all elements satisfying a specific selector.</p>
 
             
               <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">registerRoute</span> (<span class="hljs-params">el</span>) </span>{
+  <span class="hljs-keyword">const</span> group = getRoutingGroupFromEl(el)
+
+  <span class="hljs-comment">/* Create the element group if it doesn't exist already */</span>
+  <span class="hljs-keyword">if</span> (!elements[group]) elements[group] = { <span class="hljs-attr">list</span>: [], <span class="hljs-attr">fallback</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">activeElement</span>: <span class="hljs-literal">null</span> }
+
   <span class="hljs-keyword">if</span> (!routerInstalled) {
     installRouter(<span class="hljs-keyword">async</span> (location, e) =&gt; {
       activateCurrentPath(e)
@@ -370,11 +395,11 @@ mass-register all elements satisfying a specific selector.</p>
     routerInstalled = <span class="hljs-literal">true</span>
   }
 
-  <span class="hljs-keyword">if</span> (!fallback &amp;&amp; getFallbackFromEl(el)) fallback = el
-  elements.push(el)
+  <span class="hljs-keyword">if</span> (!elements[group].fallback &amp;&amp; getFallbackFromEl(el)) elements[group].fallback = el
+  elements[group].list.push(el)
 
-  <span class="hljs-keyword">if</span> (!fallback) {
-    maybeActivateElement(el)
+  <span class="hljs-keyword">if</span> (!elements[group].fallback) {
+    maybeActivateElement(el, <span class="hljs-literal">null</span>)
   } <span class="hljs-keyword">else</span> {
     activateCurrentPath(<span class="hljs-literal">null</span>)
   }
@@ -382,7 +407,9 @@ mass-register all elements satisfying a specific selector.</p>
 
 <span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">registerRoutesFromSelector</span> (<span class="hljs-params">root, selector</span>) </span>{
   <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> el <span class="hljs-keyword">of</span> root.querySelectorAll(selector)) {
-    <span class="hljs-keyword">if</span> (!elements.find(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item === el)) registerRoute(el)
+    <span class="hljs-keyword">const</span> group = getRoutingGroupFromEl(el)
+    <span class="hljs-keyword">if</span> (!elements[group]) elements[group] = { <span class="hljs-attr">list</span>: [], <span class="hljs-attr">fallback</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">activeElement</span>: <span class="hljs-literal">null</span> }
+    <span class="hljs-keyword">if</span> (!elements[group].list.find(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item === el)) registerRoute(el)
   }
 }</pre></div>
             
