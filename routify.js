@@ -331,6 +331,12 @@ const installRouter = (locationUpdatedCallback) => {
     e.preventDefault()
     if (href !== location.href) {
       window.history.pushState({}, '', href)
+
+      /* This part isn't in the original function. The idea is that */
+      /* if a link was pressed, then the history has changed and */
+      /* a popstate event should be called */
+      emitPopstate()
+
       locationUpdatedCallback(location, e)
     }
   })
@@ -355,7 +361,9 @@ const installRouter = (locationUpdatedCallback) => {
 // event. This function does just that:
 //
 export function emitPopstate (state) {
-  const e = new PopStateEvent('popstate', { state })
+  let e
+  if (state) e = new PopStateEvent('popstate', state)
+  else e = new PopStateEvent('popstate')
   window.dispatchEvent(e)
 }
 
