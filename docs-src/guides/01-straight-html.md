@@ -24,7 +24,7 @@ At this point you are ready to serve your `index.html` file with the command:
 
     $ ./node_modules/.bin/es-dev-server -a index.html
 
-Create an index.html file with the following contents:
+Create an index.html file with the following contents. Don't forget to have `<base href="/">` in your file.
 
 ````
 <!doctype html>
