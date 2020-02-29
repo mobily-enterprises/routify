@@ -466,6 +466,12 @@ is artificially added to the browser’s history with a pushState call.</p>
     e.preventDefault()
     <span class="hljs-keyword">if</span> (href !== location.href) {
       <span class="hljs-built_in">window</span>.history.pushState({}, <span class="hljs-string">''</span>, href)
+
+      <span class="hljs-comment">/* This part isn't in the original function. The idea is that */</span>
+      <span class="hljs-comment">/* if a link was pressed, then the history has changed and */</span>
+      <span class="hljs-comment">/* a popstate event should be called */</span>
+      emitPopstate()
+
       locationUpdatedCallback(location, e)
     }
   })
@@ -492,7 +498,9 @@ event. This function does just that:</p>
 
             
               <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">emitPopstate</span> (<span class="hljs-params">state</span>) </span>{
-  <span class="hljs-keyword">const</span> e = <span class="hljs-keyword">new</span> PopStateEvent(<span class="hljs-string">'popstate'</span>, { state })
+  <span class="hljs-keyword">let</span> e
+  <span class="hljs-keyword">if</span> (state) e = <span class="hljs-keyword">new</span> PopStateEvent(<span class="hljs-string">'popstate'</span>, state)
+  <span class="hljs-keyword">else</span> e = <span class="hljs-keyword">new</span> PopStateEvent(<span class="hljs-string">'popstate'</span>)
   <span class="hljs-built_in">window</span>.dispatchEvent(e)
 }</pre></div>
             
