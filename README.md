@@ -7,12 +7,11 @@ It supports sub-routes, each one with different fallbacks.
 
 ## Pure Javascript
 
-You don't need to use fancy frameworks: routify.js will work out with existing
-SPAs without intruding in the app itself.
+You don't need to use fancy frameworks: routify.js will work out with existing SPAs without intruding in the app itself.
 
-## Integrating with existing libraries
+It will work with any framework -- or even [no framework at all](https://mobily-enterprises.github.io/routify/guides/01-straight-html.html), with straight HTML files.
 
-routify.js works on plain HTML elements, as well as integrating with the following libraries:
+It also integrates with the following libraries:
 
 * lit-element. routify.js provides two mixins which will enable routing for your main page
 and any other pages in no time. Batteries included!
