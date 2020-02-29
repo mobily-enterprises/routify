@@ -1,6 +1,6 @@
 # Welcome to routify.js
 
-routify.js (yes, is the most unintrusive, and yet most powerful, client-side routing system for Single Page Applications (SPas) out there.
+routify.js is the most unintrusive, and yet most powerful, client-side routing system for Single Page Applications (SPas) out there.
 It's written in modern ES6 Javascript, has fallback support, and it does as little as possible while being very powerful.
 
 It supports sub-routes, each one with different fallbacks.
