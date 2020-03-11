@@ -7,7 +7,7 @@ Once an element is registered, its `active` property _and_ attribute are set to 
 
 * if the element has the `disable-activation` attribute or the `disableActivation` property, the `active` property/attribute is untouched
 
-* if the element has the `fallback` attribute or property, the `active` property is turned on if the browser's location _doesn't_ match the element's path
+* if the element has the `fallback` attribute or property, the `active` property is turned on if the browser's location _doesn't_ match any of the registered elements' path
 
 When the browser's location matches the element's path (or, for fallback elements, when none of the elements match the the browser's location), the element's `routerCallback(params, e)` function is called, where `params` is an object with matching URL parameters and `e` is the click event that generated the change of location.
 
