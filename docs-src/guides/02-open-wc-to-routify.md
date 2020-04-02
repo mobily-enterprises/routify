@@ -106,7 +106,7 @@ Open the file `components/page-main/src/PageMain.js`. Some small changes will ma
 
 Add this to the top:
 
-    import { MainPageMixin } from 'routify/lit/RoutingPageMixin.js'
+    import { RoutingPageMixin } from 'routify/lit/RoutingPageMixin.js'
 
 And change the class declaration into:
 
@@ -124,7 +124,7 @@ Changes to PageOne are nearly identical Open the file `components/page-main/src/
 
 Add this to the top:
 
-    import { MainPageMixin } from 'routify/lit/RoutingPageMixin.js'
+    import { RoutingPageMixin } from 'routify/lit/RoutingPageMixin.js'
 
 And change the class declaration into:
 

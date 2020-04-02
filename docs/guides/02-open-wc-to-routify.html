@@ -185,7 +185,7 @@ To do that, add this to the top:</p>
             
             <p>Open the file <code>components/page-main/src/PageMain.js</code>. Some small changes will make this page routing-aware – that is, it will add the <code>active</code> attribute to itself if the browser’s location matches its path.</p>
 <p>Add this to the top:</p>
-<pre><code>import { MainPageMixin } from &#39;routify/lit/RoutingPageMixin.js&#39;</code></pre><p>And change the class declaration into:</p>
+<pre><code>import { RoutingPageMixin } from &#39;routify/lit/RoutingPageMixin.js&#39;</code></pre><p>And change the class declaration into:</p>
 <pre><code>export class PageMain extends RoutingPageMixin(LitElement) {</code></pre><p>Finally, make the element aware of its paths by adding this line:</p>
 <pre><code>static get pagePath () { return [&#39;/&#39;, &#39;/main&#39;] }</code></pre><p>That’s it: loading the app in the browser now, you will see that this element will display when the location is either <code>/</code> or <code>/main</code>. Again, there is no magic: all the element does is set (and unset) its <code>active</code> attribute depending on the browser’s location.</p>
 <h3 id="change-pageone">Change PageOne</h3>
@@ -195,7 +195,7 @@ To do that, add this to the top:</p>
             
             <p>Changes to PageOne are nearly identical Open the file <code>components/page-main/src/PageOne.js</code>.</p>
 <p>Add this to the top:</p>
-<pre><code>import { MainPageMixin } from &#39;routify/lit/RoutingPageMixin.js&#39;</code></pre><p>And change the class declaration into:</p>
+<pre><code>import { RoutingPageMixin } from &#39;routify/lit/RoutingPageMixin.js&#39;</code></pre><p>And change the class declaration into:</p>
 <pre><code>export class PageOne extends RoutingPageMixin(LitElement) {</code></pre><p>Finally, make the element aware of its paths by adding this line:</p>
 <pre><code>static get pagePath () { return &#39;page-one&#39; }</code></pre><p>That’s it.</p>
 <h3 id="it-works">It works!</h3>
