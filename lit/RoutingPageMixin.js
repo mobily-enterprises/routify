@@ -33,6 +33,7 @@ export const RoutingPageMixin = (base) => {
     // full access to DOM, and anything set in firstUpdated
     async preRouterCallback (p) {
       await this.updateComplete
+
     }
   }
 }

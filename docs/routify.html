@@ -120,9 +120,10 @@ by default) depending on whether an element satisfies a routing pattern
             <p>routify.js uses some variables common to all functions: the list of
 observed elements (<code>elements</code>), a flag to know if the <code>installRouter</code> was
 already called (<code>routerInstalled</code>) and a default fallback element (<code>fallback</code>)</p>
+<p>Note that the router will only be installed once, globally.</p>
 
             
-              <div class='highlight'><pre><span class="hljs-keyword">const</span> elements = { <span class="hljs-attr">default</span>: { <span class="hljs-attr">list</span>: [], <span class="hljs-attr">fallback</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">activeElement</span>: <span class="hljs-literal">null</span> } }
+              <div class='highlight'><pre><span class="hljs-keyword">const</span> elements = { }
 <span class="hljs-keyword">let</span> routerInstalled = <span class="hljs-literal">false</span></pre></div>
             
           
@@ -142,6 +143,8 @@ what attribute and property are used for:</p>
 <li>define an element as fallback</li>
 <li>disable activation for the element, used for the main page</li>
 <li>elements’ callback functions</li>
+<li>the module’s suppression of fallback pages on mouse events (useful for SPAs
+doing dynamic loading)</li>
 </ul>
 <p>Developers can redefine these by using the <code>setConfig()</code> function:</p>
 <pre><code>setConfig(<span class="hljs-string">'activeProperty'</span>, <span class="hljs-string">'activated'</span>)</code></pre>
@@ -157,7 +160,8 @@ what attribute and property are used for:</p>
   <span class="hljs-attr">fallbackProperty</span>: <span class="hljs-string">'fallback'</span>,
   <span class="hljs-attr">disableActivationAttribute</span>: <span class="hljs-string">'disable-activation'</span>,
   <span class="hljs-attr">disableActivationProperty</span>: <span class="hljs-string">'disableActivation'</span>,
-  <span class="hljs-attr">routerCallbackProperty</span>: <span class="hljs-string">'routerCallback'</span>
+  <span class="hljs-attr">routerCallbackProperty</span>: <span class="hljs-string">'routerCallback'</span>,
+  <span class="hljs-attr">disableFallbackOnEvents</span>: <span class="hljs-literal">false</span>
 }
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> setConfig = <span class="hljs-function">(<span class="hljs-params">key, value</span>) =&gt;</span> { config[key] = value }</pre></div>
             
@@ -192,8 +196,11 @@ of the configuration options wherever they are.</p>
 }
 
 <span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRoutingGroupFromEl</span> (<span class="hljs-params">el</span>) </span>{
+  <span class="hljs-keyword">if</span> (getDisableActivationFromEl(el)) <span class="hljs-keyword">return</span> <span class="hljs-string">'NO_ACTIVATION'</span>
+
   <span class="hljs-keyword">return</span> el.getAttribute(config.routingGroupAttribute) ||
          el[config.routingGroupProperty] ||
+         el.constructor[config.routingGroupProperty] ||
          <span class="hljs-string">'default'</span>
 }
 
@@ -227,7 +234,7 @@ of the configuration options wherever they are.</p>
             <p>The heart of routify.js is the <code>registerRoute()</code> function, which is used to
 add an element to the list of routing” elements.</p>
 <p>To understand what <code>registerRoute()</code> does, it’s important to first understand
-what <code>activateCurrentPath()</code> and <code>maybeActivateElement()</code> do.</p>
+what <code>maybeActivateElement()</code> and <code>activateCurrentPath()</code> do.</p>
 <h3 id="maybeactivateelement">maybeActivateElement()</h3>
 
             
@@ -258,13 +265,17 @@ callback – skiping any of the activation logic.</p>
   <span class="hljs-keyword">const</span> activationDisabled = getDisableActivationFromEl(el)
 
   <span class="hljs-comment">/* No path, no setting nor unsetting of `active` */</span>
-  <span class="hljs-keyword">if</span> (!path &amp;&amp; el !== elements[group].fallback &amp;&amp; !activationDisabled) {
-    <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'Routing element does not have a path:'</span>, el)
-    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+  <span class="hljs-keyword">if</span> (!path &amp;&amp; el !== elements[group].fallback &amp;&amp; !activationDisabled) {</pre></div>
+            
+          
+            
+            <p>console.error(‘Routing element does not have a path:’, el)</p>
+
+            
+              <div class='highlight'><pre>    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
   }
 
   <span class="hljs-keyword">const</span> isActiveWithParams = locationMatch(path)
-
   <span class="hljs-comment">/* Detour: activation is disabled. Just run the callback if present */</span>
   <span class="hljs-comment">/* and just return false, since item wasn't activated */</span>
   <span class="hljs-keyword">if</span> (activationDisabled &amp;&amp; isActiveWithParams) {
@@ -277,11 +288,13 @@ callback – skiping any of the activation logic.</p>
     toggleElementActive(el, !!isActiveWithParams)
   }
 
-  <span class="hljs-comment">/* If active, call the callback (if present) */</span>
-  <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty] &amp;&amp; el !== elements[group].activeElement) el[config.routerCallbackProperty](isActiveWithParams, e)
-
   <span class="hljs-comment">/* Set the element as "the" currently active  element */</span>
   <span class="hljs-keyword">if</span> (isActiveWithParams) {
+    <span class="hljs-keyword">const</span> prevActiveElement = elements[group].activeElement
+    <span class="hljs-comment">/* If active, call the callback (if present) */</span>
+    <span class="hljs-keyword">if</span> (el !== prevActiveElement) {
+      <span class="hljs-keyword">if</span> (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, e)
+    }
     <span class="hljs-keyword">if</span> (!activationDisabled) elements[group].activeElement = el
   }
 
@@ -298,24 +311,48 @@ More crucially, it will set the fallback element as active if
 no active elements were found.</p>
 
             
-              <div class='highlight'><pre><span class="hljs-keyword">const</span> activateCurrentPath = <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> {
+              <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> activateCurrentPath = <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> {
   <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> group <span class="hljs-keyword">of</span> <span class="hljs-built_in">Object</span>.keys(elements)) {
-    <span class="hljs-keyword">if</span> (!elements[group].list.length) <span class="hljs-keyword">return</span>
-
     elements[group].activeElement = <span class="hljs-literal">null</span>
+
+    <span class="hljs-comment">/* STAGE 1: ACTIVATE THE CURRENT PATH */</span>
     <span class="hljs-keyword">let</span> oneActive = <span class="hljs-literal">false</span>
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> el <span class="hljs-keyword">of</span> elements[group].list) {
+    <span class="hljs-keyword">const</span> list = elements[group].list
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> el <span class="hljs-keyword">of</span> list) {
       <span class="hljs-keyword">const</span> isActive = maybeActivateElement(el, e)
+      <span class="hljs-keyword">if</span> (oneActive &amp;&amp; isActive) <span class="hljs-built_in">console</span>.warn(<span class="hljs-string">'WARNING! Two paths are active at the same time in the same group'</span>, elements[group].activeElement, el)
       oneActive = oneActive || isActive
     }
+
+    <span class="hljs-comment">/* STAGE 2: TURN ON THE FALLBACK (IF NEEDED) */</span>
+
     <span class="hljs-keyword">const</span> fallback = elements[group].fallback
-    <span class="hljs-keyword">if</span> (fallback) {
-      <span class="hljs-keyword">const</span> fallbackActive = !oneActive
-      toggleElementActive(fallback, fallbackActive)
-      <span class="hljs-keyword">if</span> (fallbackActive &amp;&amp; fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty]({}, e)
-    }
+    <span class="hljs-keyword">if</span> (!fallback) <span class="hljs-keyword">continue</span>
+
+    <span class="hljs-comment">/* Switch off fallback by default */</span>
+    toggleElementActive(fallback, <span class="hljs-literal">false</span>)
+
+    <span class="hljs-comment">/*
+      The conditions in which fallback doesn't apply:
+      * It's an event and fallback is switched off for events OR
+      * One element is active, so fallback doesn't make sense
+    */</span>
+    <span class="hljs-keyword">const</span> noFallbackOnEvents = e &amp;&amp; config.disableFallbackOnEvents
+    <span class="hljs-keyword">if</span> (noFallbackOnEvents || oneActive) <span class="hljs-keyword">continue</span>
+
+    <span class="hljs-comment">/*
+      It's not over yet: fallback makes sense if:
+       * there are pages in the list (to prevent flashing of fallback pages for
+         dynamically loaded pages)
+       * The list is empty, and it's not a mouse event (to actually render a
+         fallback if the user pointed the browser straight at it)
+    */</span>
+    <span class="hljs-keyword">const</span> forceFallback = (!list.length &amp;&amp; !e)
+    <span class="hljs-keyword">if</span> (list.length || forceFallback) toggleElementActive(fallback, <span class="hljs-literal">true</span>)
+
+    <span class="hljs-comment">/* Call the callback if present */</span>
+    <span class="hljs-keyword">if</span> (fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty]({}, e)
   }
-  <span class="hljs-built_in">console</span>.log(elements)
 }</pre></div>
             
           
@@ -388,17 +425,37 @@ mass-register all elements satisfying a specific selector.</p>
   <span class="hljs-comment">/* Create the element group if it doesn't exist already */</span>
   <span class="hljs-keyword">if</span> (!elements[group]) elements[group] = { <span class="hljs-attr">list</span>: [], <span class="hljs-attr">fallback</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">activeElement</span>: <span class="hljs-literal">null</span> }
 
+  <span class="hljs-comment">/* Install the GLOBAL router -- if it's not already installed */</span>
   <span class="hljs-keyword">if</span> (!routerInstalled) {
-    installRouter(<span class="hljs-keyword">async</span> (location, e) =&gt; {
+    installRouter(<span class="hljs-function">(<span class="hljs-params">location, e</span>) =&gt;</span> {
       activateCurrentPath(e)
     })
     routerInstalled = <span class="hljs-literal">true</span>
   }
 
-  <span class="hljs-keyword">if</span> (!elements[group].fallback &amp;&amp; getFallbackFromEl(el)) elements[group].fallback = el
+  <span class="hljs-comment">/* Register element, checking that it's not already registered */</span>
+  <span class="hljs-keyword">if</span> (el.__routingRegistered) {
+    <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'WARNING. Element has registered twice for routing:'</span>, el.tagName)
+  }
+  el.__routingRegistered = <span class="hljs-literal">true</span>
+
+  <span class="hljs-comment">/* If there is no the current element is a fallback, set it as a fallback */</span>
+  <span class="hljs-comment">/* Give warning if this happens twice */</span>
+  <span class="hljs-keyword">if</span> (getFallbackFromEl(el)) {
+    <span class="hljs-keyword">if</span> (elements[group].fallback) <span class="hljs-built_in">console</span>.warn(<span class="hljs-string">'WARNING. Two different elements are set as fallbacks for the same group'</span>, elements[group].fallback, el)
+    <span class="hljs-keyword">else</span> elements[group].fallback = el
+  }
+
+  <span class="hljs-comment">/* Don't run activation of the element if this element is a fallback */</span>
+  <span class="hljs-keyword">const</span> groupFallback = elements[group].fallback
+  <span class="hljs-keyword">if</span> (el === groupFallback) <span class="hljs-keyword">return</span>
+
+  <span class="hljs-comment">/* Push the element to the list of elements in this group */</span>
   elements[group].list.push(el)
 
-  <span class="hljs-keyword">if</span> (!elements[group].fallback) {
+  <span class="hljs-comment">/* Activate element. If there is no fallback, just activate it straight */</span>
+  <span class="hljs-comment">/* since there is no point in knowing that none are active in the group */</span>
+  <span class="hljs-keyword">if</span> (!groupFallback) {
     maybeActivateElement(el, <span class="hljs-literal">null</span>)
   } <span class="hljs-keyword">else</span> {
     activateCurrentPath(<span class="hljs-literal">null</span>)
@@ -470,20 +527,29 @@ is artificially added to the browser’s history with a pushState call.</p>
       <span class="hljs-comment">/* This part isn't in the original function. The idea is that */</span>
       <span class="hljs-comment">/* if a link was pressed, then the history has changed and */</span>
       <span class="hljs-comment">/* a popstate event should be called */</span>
-      emitPopstate()
+      emitPopstate()</pre></div>
+            
+          
+            
+            <p>locationUpdatedCallback(location, e)</p>
 
-      locationUpdatedCallback(location, e)
-    }
+            
+              <div class='highlight'><pre>    }
   })
 
   <span class="hljs-comment">/* Make sure the passed callback is called when the history changes. The */</span>
-  <span class="hljs-comment">/* pushState call above will indeed make this happen */</span>
+  <span class="hljs-comment">/* emitPopState call above will trigger this */</span>
   <span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'popstate'</span>, e =&gt; locationUpdatedCallback(<span class="hljs-built_in">window</span>.location, e))
 
   <span class="hljs-comment">/* Artificially call the callback at installation time. This is important so that */</span>
-  <span class="hljs-comment">/* developers using this function can do one-off setups  */</span>
-  locationUpdatedCallback(<span class="hljs-built_in">window</span>.location, <span class="hljs-literal">null</span>)
-}</pre></div>
+  <span class="hljs-comment">/* developers using this function can do one-off setups  */</span></pre></div>
+            
+          
+            
+            <p>locationUpdatedCallback(window.location, null)</p>
+
+            
+              <div class='highlight'><pre>}</pre></div>
             
           
             

@@ -196,6 +196,7 @@ const activateCurrentPath = async (e) => {
         if (fallback[config.preRouterCallbackProperty]) await fallback[config.preRouterCallbackProperty]({}, e)
         if (fallback[config.routerCallbackProperty]) await fallback[config.routerCallbackProperty]({}, e)
       }
+
     }
   }
   console.log(elements)
