@@ -27,6 +27,8 @@ export const RoutingPageMixin = (base) => {
       return locationMatch(getPagePathFromEl(this), checker)
     }
 
+    routerCallback () { }
+
     // This will make sure that the routerCallback function has
     // full access to DOM, and anything set in firstUpdated
     async preRouterCallback (p) {
