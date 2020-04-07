@@ -383,14 +383,16 @@ const installRouter = (locationUpdatedCallback) => {
     /* browser's history */
     e.preventDefault()
     if (href !== location.href) {
-      window.history.pushState({}, '', href)
+      const state = { artificial: true }
 
-      /* This part isn't in the original function. The idea is that */
-      /* if a link was pressed, then the history has changed and */
+      window.history.pushState(state, '', href)
+
+      /* If a link was pressed, then the history has changed and */
       /* a popstate event should be called */
-      emitPopstate()
-
-      // locationUpdatedCallback(location, e)
+      /* The `artificial` property in the state will potentially tell */
+      /* listeners that this wasn't a proper "pure" browser event (that is, */
+      /* it wasn't the result of a user clicking on a button) */
+      emitPopstate( { state })
     }
   })
 
