@@ -13,7 +13,9 @@
 // observed elements (`elements`), a flag to know if the `installRouter` was
 // already called (`routerInstalled`) and a default fallback element (`fallback`)
 
-const elements = { default: { list: [], fallback: null, activeElement: null } }
+// Note that the router will only be installed once, globally.
+
+const elements = { }
 let routerInstalled = false
 
 // ## Configuration options and helpers
@@ -27,6 +29,8 @@ let routerInstalled = false
 // * define an element as fallback
 // * disable activation for the element, used for the main page
 // * elements' callback functions
+// * the module's suppression of fallback pages on mouse events (useful for SPAs
+//   doing dynamic loading)
 //
 // Developers can redefine these by using the `setConfig()` function:
 //
@@ -42,8 +46,8 @@ const config = {
   fallbackProperty: 'fallback',
   disableActivationAttribute: 'disable-activation',
   disableActivationProperty: 'disableActivation',
-  preRouterCallbackProperty: 'preRouterCallback',
-  routerCallbackProperty: 'routerCallback'
+  routerCallbackProperty: 'routerCallback',
+  disableFallbackOnEvents: false
 }
 export const setConfig = (key, value) => { config[key] = value }
 
@@ -77,8 +81,11 @@ export function getPagePathFromEl (el) {
 }
 
 export function getRoutingGroupFromEl (el) {
+  if (getDisableActivationFromEl(el)) return 'NO_ACTIVATION'
+
   return el.getAttribute(config.routingGroupAttribute) ||
          el[config.routingGroupProperty] ||
+         el.constructor[config.routingGroupProperty] ||
          'default'
 }
 
@@ -108,7 +115,7 @@ export function getActiveFromEl (el) {
 // add an element to the list of routing" elements.
 //
 // To understand what `registerRoute()` does, it's important to first understand
-// what `activateCurrentPath()` and `maybeActivateElement()` do.
+// what `maybeActivateElement()` and `activateCurrentPath()` do.
 //
 // ### maybeActivateElement()
 //
@@ -131,7 +138,7 @@ export function getActiveFromEl (el) {
 // This is achieved using the `disable-activation` attribute or `disableActivation`
 // property, which will cause the function to detour, and only run the
 // callback -- skiping any of the activation logic.
-const maybeActivateElement = async function (el, e) {
+const maybeActivateElement = function (el, e) {
   const path = getPagePathFromEl(el)
   const group = getRoutingGroupFromEl(el)
 
@@ -139,7 +146,7 @@ const maybeActivateElement = async function (el, e) {
 
   /* No path, no setting nor unsetting of `active` */
   if (!path && el !== elements[group].fallback && !activationDisabled) {
-    console.error('Routing element does not have a path:', el)
+    // console.error('Routing element does not have a path:', el)
     return false
   }
 
@@ -147,8 +154,7 @@ const maybeActivateElement = async function (el, e) {
   /* Detour: activation is disabled. Just run the callback if present */
   /* and just return false, since item wasn't activated */
   if (activationDisabled && isActiveWithParams) {
-    if (el[config.preRouterCallbackProperty]) await el[config.preRouterCallbackProperty](isActiveWithParams, e)
-    if (el[config.routerCallbackProperty]) await el[config.routerCallbackProperty](isActiveWithParams, e)
+    if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, e)
     return false
   }
 
@@ -157,14 +163,13 @@ const maybeActivateElement = async function (el, e) {
     toggleElementActive(el, !!isActiveWithParams)
   }
 
-  /* If active, call the callback (if present) */
-  if (isActiveWithParams && el !== elements[group].activeElement) {
-    if (el[config.preRouterCallbackProperty]) await el[config.preRouterCallbackProperty](isActiveWithParams, e)
-    if (el[config.routerCallbackProperty]) await el[config.routerCallbackProperty](isActiveWithParams, e)
-  }
-
   /* Set the element as "the" currently active  element */
   if (isActiveWithParams) {
+    const prevActiveElement = elements[group].activeElement
+    /* If active, call the callback (if present) */
+    if (el !== prevActiveElement) {
+      if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, e)
+    }
     if (!activationDisabled) elements[group].activeElement = el
   }
 
@@ -178,28 +183,48 @@ const maybeActivateElement = async function (el, e) {
 // More crucially, it will set the fallback element as active if
 // no active elements were found.
 //
-const activateCurrentPath = async (e) => {
+export const activateCurrentPath = (e) => {
   for (const group of Object.keys(elements)) {
-    if (!elements[group].list.length) return
-
     elements[group].activeElement = null
+
+    /* STAGE 1: ACTIVATE THE CURRENT PATH */
     let oneActive = false
-    for (const el of elements[group].list) {
-      const isActive = await maybeActivateElement(el, e)
+    const list = elements[group].list
+    for (const el of list) {
+      const isActive = maybeActivateElement(el, e)
+      if (oneActive && isActive) console.warn('WARNING! Two paths are active at the same time in the same group', elements[group].activeElement, el)
       oneActive = oneActive || isActive
     }
-    const fallback = elements[group].fallback
-    if (fallback) {
-      const fallbackActive = !oneActive
-      toggleElementActive(fallback, fallbackActive)
-      if (fallbackActive) {
-        if (fallback[config.preRouterCallbackProperty]) await fallback[config.preRouterCallbackProperty]({}, e)
-        if (fallback[config.routerCallbackProperty]) await fallback[config.routerCallbackProperty]({}, e)
-      }
 
-    }
+    /* STAGE 2: TURN ON THE FALLBACK (IF NEEDED) */
+
+    const fallback = elements[group].fallback
+    if (!fallback) continue
+
+    /* Switch off fallback by default */
+    toggleElementActive(fallback, false)
+
+    /*
+      The conditions in which fallback doesn't apply:
+      * It's an event and fallback is switched off for events OR
+      * One element is active, so fallback doesn't make sense
+    */
+    const noFallbackOnEvents = e && config.disableFallbackOnEvents
+    if (noFallbackOnEvents || oneActive) continue
+
+    /*
+      It's not over yet: fallback makes sense if:
+       * there are pages in the list (to prevent flashing of fallback pages for
+         dynamically loaded pages)
+       * The list is empty, and it's not a mouse event (to actually render a
+         fallback if the user pointed the browser straight at it)
+    */
+    const forceFallback = (!list.length && !e)
+    if (list.length || forceFallback) toggleElementActive(fallback, true)
+
+    /* Call the callback if present */
+    if (fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty]({}, e)
   }
-  console.log(elements)
 }
 
 // Both the functions above use this simple helper that will toggle the `active`
@@ -258,45 +283,58 @@ const toggleElementActive = (el, active) => {
 // Another function, `registerRoutesFromSelector()`, is provided to
 // mass-register all elements satisfying a specific selector.
 
-export async function registerRoute (el) {
+export function registerRoute (el) {
   const group = getRoutingGroupFromEl(el)
 
   /* Create the element group if it doesn't exist already */
   if (!elements[group]) elements[group] = { list: [], fallback: null, activeElement: null }
 
-  // Install the GLOBAL router -- if it's not already installed
+  /* Install the GLOBAL router -- if it's not already installed */
   if (!routerInstalled) {
-    installRouter(async (location, e) => {
-      await activateCurrentPath(e)
+    installRouter((location, e) => {
+      activateCurrentPath(e)
     })
     routerInstalled = true
   }
 
-  // Register element, checking that it's not already registered
+  /* Register element, checking that it's not already registered */
   if (el.__routingRegistered) {
     console.error('WARNING. Element has registered twice for routing:', el.tagName)
   }
   el.__routingRegistered = true
+
+  /* If there is no the current element is a fallback, set it as a fallback */
+  /* Give warning if this happens twice */
+  if (getFallbackFromEl(el)) {
+    if (elements[group].fallback) console.warn('WARNING. Two different elements are set as fallbacks for the same group', elements[group].fallback, el)
+    else elements[group].fallback = el
+  }
+
+  /* Don't run activation of the element if this element is a fallback */
+  const groupFallback = elements[group].fallback
+  if (el === groupFallback) return
+
+  /* Push the element to the list of elements in this group */
   elements[group].list.push(el)
 
-  // Manage fallback
-  if (!elements[group].fallback && getFallbackFromEl(el)) elements[group].fallback = el
-  if (!elements[group].fallback) {
-    await maybeActivateElement(el, null)
+  /* Activate element. If there is no fallback, just activate it straight */
+  /* since there is no point in knowing that none are active in the group */
+  if (!groupFallback) {
+    maybeActivateElement(el, null)
   } else {
-    await activateCurrentPath(null)
+    activateCurrentPath(null)
   }
 }
 
-export async function registerRoutesFromSelector (root, selector) {
+export function registerRoutesFromSelector (root, selector) {
   for (const el of root.querySelectorAll(selector)) {
     const group = getRoutingGroupFromEl(el)
     if (!elements[group]) elements[group] = { list: [], fallback: null, activeElement: null }
-    if (!elements[group].list.find(item => item === el)) await registerRoute(el)
+    if (!elements[group].list.find(item => item === el)) registerRoute(el)
   }
 }
 
-export async function unregisterRoute (el) {
+export function unregisterRoute (el) {
   const group = getRoutingGroupFromEl(el)
 
   if (!elements[group]) return
@@ -304,7 +342,7 @@ export async function unregisterRoute (el) {
   elements[group].list = elements[group].list.filter(item => item !== el)
 }
 
-export async function unregisterRoutesFromSelector (root, selector) {
+export function unregisterRoutesFromSelector (root, selector) {
   for (const el of root.querySelectorAll(selector)) {
     const group = getRoutingGroupFromEl(el)
     if (!elements[group]) return
@@ -352,17 +390,17 @@ const installRouter = (locationUpdatedCallback) => {
       /* a popstate event should be called */
       emitPopstate()
 
-      locationUpdatedCallback(location, e)
+      // locationUpdatedCallback(location, e)
     }
   })
 
   /* Make sure the passed callback is called when the history changes. The */
-  /* pushState call above will indeed make this happen */
+  /* emitPopState call above will trigger this */
   window.addEventListener('popstate', e => locationUpdatedCallback(window.location, e))
 
   /* Artificially call the callback at installation time. This is important so that */
   /* developers using this function can do one-off setups  */
-  locationUpdatedCallback(window.location, null)
+  // locationUpdatedCallback(window.location, null)
 }
 
 // The `installRouter()` function makes sure that the correct callback is called
