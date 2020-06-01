@@ -23,14 +23,15 @@ let routerInstalled = false
 // routify.js can be configured by the `setConfig` function, which will set
 // keys for the module variable `config`. The configuration defines
 // what attribute and property are used for:
-// * elements' active flag
-// * elements' paths
-// * elements' routing groups
-// * define an element as fallback
-// * disable activation for the element, used for the main page
-// * elements' callback functions
-// * the module's suppression of fallback pages on mouse events (useful for SPAs
-//   doing dynamic loading)
+// * `activeAttribute/activeProperty` -- elements' active flag
+// * `pagePathAttribute/pagePathProperty` -- elements' paths
+// * `routingGroupAttribute/routingGroupProperty` -- elements' routing groups
+// * `fallbackAttribute/fallbackProperty` -- define an element as fallback
+// * `disableActivationAttribute/disableActivationProperty` -- disable activation for the element, used for the main page
+// * `routerCallbackProperty` -- elements' callback functions
+// * `disableFallbackOnEvents` -- the module's suppression of fallback pages on mouse events (useful for SPAs
+//   doing dynamic loading, where at click time an element might not yet be initialised
+//   and the Not Found page would "flash" before the element is rendered and activated)
 //
 // Developers can redefine these by using the `setConfig()` function:
 //
