@@ -31,7 +31,8 @@ let routerInstalled = false
 // * `routerCallbackProperty` -- elements' callback functions
 // * `disableFallbackOnEvents` -- the module's suppression of fallback pages on mouse events (useful for SPAs
 //   doing dynamic loading, where at click time an element might not yet be initialised
-//   and the Not Found page would "flash" before the element is rendered and activated)
+//   and the Not Found page would "flash" before the element is rendered and activated). SPAs using dynamic loading
+//   must remember to do this: `if (!mod) activateCurrentPath()` if they want to display 404 for failed loading
 //
 // Developers can redefine these by using the `setConfig()` function:
 //
