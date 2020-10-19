@@ -1,4 +1,4 @@
-import { locationMatch, getPagePathFromEl, registerRoute, unregisterRoute, registerRoutesFromSelector, unregisterRoutesFromSelector } from '../routify'
+import { locationMatch, getPagePathFromEl, registerRoute, unregisterRoute, registerRoutesFromSelector } from '../routify'
 
 export const MainPageMixin = (base) => {
   return class Base extends base {
