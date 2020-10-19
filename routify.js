@@ -49,7 +49,7 @@ const config = {
   disableActivationAttribute: 'disable-activation',
   disableActivationProperty: 'disableActivation',
   routerCallbackProperty: 'routerCallback',
-  disableFallbackOnEvents: false
+  disableFallbackOnEvents: []
 }
 export const setConfig = (key, value) => { config[key] = value }
 
@@ -179,6 +179,32 @@ const maybeActivateElement = function (el, e) {
   return !!isActiveWithParams
 }
 
+export const forceActiveElement = (elementToActivate, path = '') => {
+  const group = getRoutingGroupFromEl(elementToActivate)
+
+  const list = [...elements[group].list, elements[group].fallback]
+
+  for (const el of list) {
+    // If it's not the element to activate, pass
+    if (el !== elementToActivate) {
+      toggleElementActive(el, false)
+
+    // If it's the element to activate,
+    } else {
+      if (!getActiveFromEl(el)) {
+        toggleElementActive(el, true)
+        elements[group].activeElement = el
+
+        // Call the element's callback if set. Note that the 'path'
+        if (el[config.routerCallbackProperty]) {
+          const locationParams = locationMatch(path) || {}
+          el[config.routerCallbackProperty](locationParams)
+        }
+      }
+    }
+  }
+}
+
 // `maybeActivateElement()` only deals with one specific element,
 // `activateCurrentPath()`, on the other hand, will run `maybeActivateElement()`
 // for each routing element (that is, every element in the `elements` array).
@@ -211,7 +237,7 @@ export const activateCurrentPath = (e) => {
       * It's an event and fallback is switched off for events OR
       * One element is active, so fallback doesn't make sense
     */
-    const noFallbackOnEvents = e && config.disableFallbackOnEvents
+    const noFallbackOnEvents = e && config.disableFallbackOnEvents.indexOf(group) !== -1
     if (noFallbackOnEvents || oneActive) continue
 
     /*
@@ -394,7 +420,7 @@ const installRouter = (locationUpdatedCallback) => {
       /* The `artificial` property in the state will potentially tell */
       /* listeners that this wasn't a proper "pure" browser event (that is, */
       /* it wasn't the result of a user clicking on a button) */
-      emitPopstate( { state })
+      emitPopstate({ state })
     }
   })
 
