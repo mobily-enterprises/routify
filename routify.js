@@ -27,7 +27,6 @@ let routerInstalled = false
 // * `pagePathAttribute/pagePathProperty` -- elements' paths
 // * `routingGroupAttribute/routingGroupProperty` -- elements' routing groups
 // * `fallbackAttribute/fallbackProperty` -- define an element as fallback
-// * `disableActivationAttribute/disableActivationProperty` -- disable activation for the element, used for the main page
 // * `routerCallbackProperty` -- elements' callback functions
 // * `disableFallbackOnEvents` -- the module's suppression of fallback pages on mouse events (useful for SPAs
 //   doing dynamic loading, where at click time an element might not yet be initialised
@@ -44,12 +43,7 @@ const config = {
   pagePathProperty: 'pagePath',
   routingGroupAttribute: 'routing-group',
   routingGroupProperty: 'routingGroup',
-  fallbackAttribute: 'fallback',
-  fallbackProperty: 'fallback',
-  disableActivationAttribute: 'disable-activation',
-  disableActivationProperty: 'disableActivation',
-  routerCallbackProperty: 'routerCallback',
-  disableFallbackOnEvents: []
+  routerCallbackProperty: 'routerCallback'
 }
 export const setConfig = (key, value) => { config[key] = value }
 
@@ -83,7 +77,6 @@ export function getPagePathFromEl (el) {
 }
 
 export function getRoutingGroupFromEl (el) {
-  if (getDisableActivationFromEl(el)) return 'NO_ACTIVATION'
 
   return el.getAttribute(config.routingGroupAttribute) ||
          el[config.routingGroupProperty] ||
@@ -91,19 +84,6 @@ export function getRoutingGroupFromEl (el) {
          'default'
 }
 
-export function getFallbackFromEl (el) {
-  return el.hasAttribute(config.fallbackAttribute) ||
-         el[config.fallbackProperty] ||
-         el.constructor[config.fallbackProperty] ||
-         false
-}
-
-export function getDisableActivationFromEl (el) {
-  return el.hasAttribute(config.disableActivationAttribute) ||
-         el[config.disableActivationProperty] ||
-         el.constructor[config.disableActivationProperty] ||
-         false
-}
 
 export function getActiveFromEl (el) {
   return el.hasAttribute(config.activeAttribute) ||
@@ -141,47 +121,112 @@ export function getActiveFromEl (el) {
 // property, which will cause the function to detour, and only run the
 // callback -- skiping any of the activation logic.
 const maybeActivateElement = function (el, e) {
+  debugger
   const path = getPagePathFromEl(el)
   const group = getRoutingGroupFromEl(el)
 
-  const activationDisabled = getDisableActivationFromEl(el)
-
   /* No path, no setting nor unsetting of `active` */
-  if (!path && el !== elements[group].fallback && !activationDisabled) {
-    // console.error('Routing element does not have a path:', el)
+  if (!path) {
+    console.error('Routing element does not have a path:', el)
     return false
   }
 
-  const isActiveWithParams = locationMatch(path)
-  /* Detour: activation is disabled. Just run the callback if present */
-  /* and just return false, since item wasn't activated */
-  if (activationDisabled && isActiveWithParams) {
-    if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, e)
-    return false
-  }
+  // The element doesn't match the path: don't bother doing anything
+  const locationMatchedParams = locationMatch(path)
+  if (!locationMatchedParams) return
 
-  if (!!isActiveWithParams !== getActiveFromEl(el)) {
-    /* Toggle the active property/attribute */
-    toggleElementActive(el, !!isActiveWithParams)
-  }
+  if (allowSwappingActiveElementWith(el, locationMatchedParams.__PATH__)) {
+    const oldActiveElement = elements[group].activeElement
 
-  /* Set the element as "the" currently active  element */
-  if (isActiveWithParams) {
-    /* If active, call the callback (if present) */
-    if (elements[group].activeElement !== el) {
+    // The same element is being activated again: just update the
+    // path (which may have changed) and run the routingCallback
+    if (el === oldActiveElement) {
+      elements[group].activeElementWithPath = locationMatchedParams.__PATH__
+      if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](locationMatchedParams, e)
+
+    // The active element has changed: mark the old one as inactive, make the new
+    // element as active, and run the router callback
+    } else {
+      if (oldActiveElement) toggleElementActive(oldActiveElement, false)
+      toggleElementActive(el, true)
       elements[group].activeElement = el
-      if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, e)
+      elements[group].activeElementWithPath = locationMatchedParams.__PATH__
+
+      if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](locationMatchedParams, e)
     }
+    /* Return true or false, depending on the element being active or not */
+    return true
+  }
+  return false
+}
+
+// If there is a currently active element, only allow
+// toggling of the new element if the old active element is
+// less specific
+const allowSwappingActiveElementWith = function (el, elPath) {
+  // No current element: definitely allow
+  const group = getRoutingGroupFromEl(el)
+  const oldActiveElement = elements[group].activeElement
+  if (!oldActiveElement) return true
+
+  // Current active element doesn't match the location: definitely allow
+  const oldActiveElementPath = elements[group].activeElementWithPath
+  if (!locationMatch(oldActiveElementPath)) return true
+
+  // The currently active element is MORE specific: do NOT allow
+  if (compareSpecificity(oldActiveElementPath, elPath) === 1) {
+    return false
   }
 
-  /* Return true or false, depending on the element being active or not */
-  return !!isActiveWithParams
+  // Otherwise, return true
+  return true
+}
+
+const compareSpecificity = function (a, b) {
+  const firstCharacterSpecial = function (str) {
+    const c = str.charAt(0)
+    return c === ':' || c === '*'
+  }
+
+  // A wins if 1 is returned
+  // B wins if -1 is returned
+  // 0 is a draw
+
+  const aObject = new URL(a, 'http://localhost/')
+  const aTokens = aObject.pathname.split('/')
+
+  const bObject = new URL(b, 'http://localhost/')
+  const bTokens = bObject.pathname.split('/')
+
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const aToken = aTokens[i]
+    const bToken = bTokens[i]
+
+    // Tokens are the same: next
+    if (aToken === bToken) continue
+
+    // Whichever is longer wins
+    if (aToken && typeof bToken === 'undefined') return 1
+    if (bToken && typeof aToken === 'undefined') return -1
+
+    // They both start with non-special characters: next
+    if (!firstCharacterSpecial(aToken) && !firstCharacterSpecial(bToken)) continue
+
+    // Whichever has ** loses since it's really not specific
+    if (aToken === '**') return -1
+    if (bToken === '**') return 1
+
+    // Whichever has * loses
+    if (aToken === '*') return -1
+    if (bToken === '*') return 1
+  }
+  return 0
 }
 
 export const forceActiveElement = (elementToActivate, path = '') => {
   const group = getRoutingGroupFromEl(elementToActivate)
 
-  const list = [...elements[group].list, elements[group].fallback]
+  const list = elements[group].list
 
   for (const el of list) {
     // If it's not the element to activate, pass
@@ -193,64 +238,15 @@ export const forceActiveElement = (elementToActivate, path = '') => {
       if (!getActiveFromEl(el)) {
         toggleElementActive(el, true)
         elements[group].activeElement = el
-
-        // Call the element's callback if set. Note that the 'path'
-        if (el[config.routerCallbackProperty]) {
-          const locationParams = locationMatch(path) || {}
-          el[config.routerCallbackProperty](locationParams)
-        }
+        elements[group].activeElementWithPath = path
+      }
+      // Call the element's callback if set. Note that the 'path'
+      // can well be null
+      if (el[config.routerCallbackProperty]) {
+        const locationParams = locationMatch(path) || {}
+        el[config.routerCallbackProperty](locationParams)
       }
     }
-  }
-}
-
-// `maybeActivateElement()` only deals with one specific element,
-// `activateCurrentPath()`, on the other hand, will run `maybeActivateElement()`
-// for each routing element (that is, every element in the `elements` array).
-// More crucially, it will set the fallback element as active if
-// no active elements were found.
-//
-export const activateCurrentPath = (e) => {
-  for (const group of Object.keys(elements)) {
-    // elements[group].activeElement = null
-
-    /* STAGE 1: ACTIVATE THE CURRENT PATH */
-    let oneActive = false
-    const list = elements[group].list
-    for (const el of list) {
-      const isActive = maybeActivateElement(el, e)
-      if (oneActive && isActive) console.warn('WARNING! Two paths are active at the same time in the same group', elements[group].activeElement, el)
-      oneActive = oneActive || isActive
-    }
-
-    /* STAGE 2: TURN ON THE FALLBACK (IF NEEDED) */
-
-    const fallback = elements[group].fallback
-    if (!fallback) continue
-
-    /* Switch off fallback by default */
-    toggleElementActive(fallback, false)
-
-    /*
-      The conditions in which fallback doesn't apply:
-      * It's an event and fallback is switched off for events OR
-      * One element is active, so fallback doesn't make sense
-    */
-    const noFallbackOnEvents = e && config.disableFallbackOnEvents.indexOf(group) !== -1
-    if (noFallbackOnEvents || oneActive) continue
-
-    /*
-      It's not over yet: fallback makes sense if:
-       * there are pages in the list (to prevent flashing of fallback pages for
-         dynamically loaded pages)
-       * The list is empty, and it's not a mouse event (to actually render a
-         fallback if the user pointed the browser straight at it)
-    */
-    const forceFallback = (!list.length && !e)
-    if (list.length || forceFallback) toggleElementActive(fallback, true)
-
-    /* Call the callback if present */
-    if (fallback[config.routerCallbackProperty]) fallback[config.routerCallbackProperty]({}, e)
   }
 }
 
@@ -262,6 +258,19 @@ const toggleElementActive = (el, active) => {
   el[config.activeProperty] = active
   el.toggleAttribute(config.activeAttribute, active)
   if (active) el.dispatchEvent(new CustomEvent('route-activated', { details: { element: el }, bubbles: true, composed: true }))
+}
+
+// `activateCurrentPath()` will run `maybeActivateElement()`
+// for each routing element in each group
+//
+export const activateCurrentPath = (e) => {
+  for (const group of Object.keys(elements)) {
+    const list = elements[group].list
+    for (const el of list) {
+      const isActive = maybeActivateElement(el, e)
+      // if (isActive) break
+    }
+  }
 }
 
 // ### Registering routes
@@ -288,33 +297,11 @@ const toggleElementActive = (el, active) => {
 //
 // ## The second part
 //
-// The second part of the function is run immediately: here, the registered
-// element is pushed into the `elements` array. The global variable `fallback` is
-// also set if the element is indeed the fallback one (that is, it has the
-// correct attribute/property set).
-//
-// Once the element is added, the system needs to be check whether it's active
-// or not. Running `activateCurrentPath()` definitely works. However, it would
-// be an overkill, since each element in the (growing) `elements` array will be
-// checked each tim after registering a new element.
-//
-// If there is no fallback defined, `maybeActivateElement(el)`
-// (which focuses on the element itself) is enough, since it can safely be assumed
-// that the page's location will stay the same between calls.
-// However, if a fallback is defined, then `activateCurrentPath()` is needed since
-// it's the only function that will set the fallback as active if necessary (that's
-// because it's impossible to know if none of the elements are active unless
-// they are all checked).
-//
-// This is why it's ideal, for performance, to define fallback pages last.
-// Another function, `registerRoutesFromSelector()`, is provided to
-// mass-register all elements satisfying a specific selector.
-
 export function registerRoute (el) {
   const group = getRoutingGroupFromEl(el)
 
   /* Create the element group if it doesn't exist already */
-  if (!elements[group]) elements[group] = { list: [], fallback: null, activeElement: null }
+  if (!elements[group]) elements[group] = { list: [], activeElement: null }
 
   /* Install the GLOBAL router -- if it's not already installed */
   if (!routerInstalled) {
@@ -330,33 +317,17 @@ export function registerRoute (el) {
   }
   el.__routingRegistered = true
 
-  /* If there is no the current element is a fallback, set it as a fallback */
-  /* Give warning if this happens twice */
-  if (getFallbackFromEl(el)) {
-    if (elements[group].fallback) console.warn('WARNING. Two different elements are set as fallbacks for the same group', elements[group].fallback, el)
-    else elements[group].fallback = el
-  }
-
-  /* Don't run activation of the element if this element is a fallback */
-  const groupFallback = elements[group].fallback
-  if (el === groupFallback) return
-
   /* Push the element to the list of elements in this group */
   elements[group].list.push(el)
 
-  /* Activate element. If there is no fallback, just activate it straight */
-  /* since there is no point in knowing that none are active in the group */
-  if (!groupFallback) {
-    maybeActivateElement(el, null)
-  } else {
-    activateCurrentPath(null)
-  }
+  /* MAYBE activate the element. */
+  maybeActivateElement(el, null)
 }
 
 export function registerRoutesFromSelector (root, selector) {
   for (const el of root.querySelectorAll(selector)) {
     const group = getRoutingGroupFromEl(el)
-    if (!elements[group]) elements[group] = { list: [], fallback: null, activeElement: null }
+    if (!elements[group]) elements[group] = { list: [], activeElement: null }
     if (!elements[group].list.find(item => item === el)) registerRoute(el)
   }
 }
@@ -508,9 +479,12 @@ export function locationMatch (templateUrl, checker) {
         // skip the next check
         if (templatePath[i] === '*' && browserPath[i]) continue
 
+        if (templatePath[i] === '**') break
+
         if (templatePath[i] !== browserPath[i]) return false
       }
     }
+    callbackParams.__PATH__ = templateUrl
 
     // No param checker: return true, since parameters won't need checking
     if (!checker) return callbackParams
