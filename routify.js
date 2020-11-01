@@ -167,12 +167,11 @@ const maybeActivateElement = function (el, e) {
 
   /* Set the element as "the" currently active  element */
   if (isActiveWithParams) {
-    const prevActiveElement = elements[group].activeElement
     /* If active, call the callback (if present) */
-    if (el !== prevActiveElement) {
+    if (elements[group].activeElement !== el) {
+      elements[group].activeElement = el
       if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](isActiveWithParams, e)
     }
-    if (!activationDisabled) elements[group].activeElement = el
   }
 
   /* Return true or false, depending on the element being active or not */
@@ -213,7 +212,7 @@ export const forceActiveElement = (elementToActivate, path = '') => {
 //
 export const activateCurrentPath = (e) => {
   for (const group of Object.keys(elements)) {
-    elements[group].activeElement = null
+    // elements[group].activeElement = null
 
     /* STAGE 1: ACTIVATE THE CURRENT PATH */
     let oneActive = false
