@@ -39,12 +39,11 @@ let routerInstalled = false
 const config = {
   activeAttribute: 'active',
   activeProperty: 'active',
-  fallbackAttribute: 'fallback',
-  fallbackProperty: 'fallback',
   pagePathAttribute: 'page-path',
   pagePathProperty: 'pagePath',
   routingGroupAttribute: 'routing-group',
   routingGroupProperty: 'routingGroup'
+  //routerCallbackProperty: 'routerCallback'
 }
 export const setConfig = (key, value) => { config[key] = value }
 
@@ -78,11 +77,13 @@ export function getPagePathFromEl (el) {
 }
 
 export function getRoutingGroupFromEl (el) {
+
   return el.getAttribute(config.routingGroupAttribute) ||
          el[config.routingGroupProperty] ||
          el.constructor[config.routingGroupProperty] ||
          'default'
 }
+
 
 export function getActiveFromEl (el) {
   return el.hasAttribute(config.activeAttribute) ||
@@ -90,22 +91,30 @@ export function getActiveFromEl (el) {
          false
 }
 
-export function getFallbackFromEl (el) {
-  return el.hasAttribute(config.fallbackAttribute) ||
-         el[config.fallbackProperty] ||
-         el.constructor[config.fallbackProperty] ||
-         false
+
+export function disableElement (group, element) {
+  if (!elements[group]) elements[group] = { list: [], disabled: [], activeElement: null }
+  const disabled = elements[group].disabled
+  if (disabled.find(el => el === element)) return
+  disabled.push(el)
 }
 
-export function disableFallbackForGroup (group) {
-  if (!elements[group]) elements[group] = { list: [], activeElement: null }
-  elements[group].fallbackDisabled = true
+export function enableElement (group, element) {
+  if (!elements[group]) {
+    elements[group] = { list: [], disabled: [], activeElement: null }
+    return
+  }
+  elements[group].disabled = elements[group].disabled.filter(el => el !== element)
 }
 
-export function enableFallbackForGroup (group) {
-  if (!elements[group]) elements[group] = { list: [], activeElement: null }
-  elements[group].fallbackDisabled = false
+export function elementIsDisabled (group, element) {
+  if (!elements[group]) {
+    elements[group] = { list: [], disabled: [], activeElement: null }
+    return false
+  }
+  return elements[group].disabled.find(el => el === element)
 }
+
 
 // ## Registration and activation of elements
 //
@@ -151,9 +160,9 @@ const maybeActivateElement = function (el, e) {
   // The element doesn't match the path: don't bother doing anything
   const locationMatchedParams = locationMatch(path)
   if (!locationMatchedParams) return
-  // debugger
+  debugger
 
-  if (getFallbackFromEl(el) && elements[group].fallbackDisabled) return
+  if (elementIsDisabled(group, el)) return
 
   if (allowSwappingActiveElementWith(el, locationMatchedParams.__PATH__)) {
     const oldActiveElement = elements[group].activeElement
@@ -268,7 +277,7 @@ export const activateElement = (elementToActivate, path = '') => {
   }
 }
 
-async function callRouterCallback (el, locationParams, e) {
+async function callRouterCallback(el, locationParams, e) {
   if (el.preRouterCallback) await el.preRouterCallback(locationParams, e)
   if (el.routerCallback) await el.routerCallback(locationParams, e)
   if (el.postRouterCallback) await el.postRouterCallback(locationParams, e)
@@ -291,7 +300,8 @@ export const activateCurrentPath = (e) => {
   for (const group of Object.keys(elements)) {
     const list = elements[group].list
     for (const el of list) {
-      maybeActivateElement(el, e)
+      const isActive = maybeActivateElement(el, e)
+      // if (isActive) break
     }
   }
 }
@@ -324,7 +334,7 @@ export function registerRoute (el) {
   const group = getRoutingGroupFromEl(el)
 
   /* Create the element group if it doesn't exist already */
-  if (!elements[group]) elements[group] = { list: [], activeElement: null }
+  if (!elements[group]) elements[group] = { list: [], disabled: [], activeElement: null }
 
   /* Install the GLOBAL router -- if it's not already installed */
   if (!routerInstalled) {
@@ -350,7 +360,7 @@ export function registerRoute (el) {
 export function registerRoutesFromSelector (root, selector) {
   for (const el of root.querySelectorAll(selector)) {
     const group = getRoutingGroupFromEl(el)
-    if (!elements[group]) elements[group] = { list: [], activeElement: null }
+    if (!elements[group]) elements[group] = { list: [], disabled: [], activeElement: null }
     if (!elements[group].list.find(item => item === el)) registerRoute(el)
   }
 }
