@@ -160,7 +160,7 @@ const maybeActivateElement = function (el, e) {
   // The element doesn't match the path: don't bother doing anything
   const locationMatchedParams = locationMatch(path)
   if (!locationMatchedParams) return
-  debugger
+  // debugger
 
   if (elementIsDisabled(group, el)) return
 
