@@ -22,11 +22,8 @@ export const MainPageMixin = (base) => {
       }
     }
 
-    async routerCallbackWithUpdate (params) {
-      if (this.routerCallback) {
-        await this.updateComplete
-        this.routerCallback(params)
-      }
+    async preRouterCallback (params) {
+      await this.updateComplete
     }
 
     locationMatch (checker) {

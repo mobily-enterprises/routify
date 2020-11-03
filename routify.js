@@ -39,11 +39,12 @@ let routerInstalled = false
 const config = {
   activeAttribute: 'active',
   activeProperty: 'active',
+  fallbackAttribute: 'fallback',
+  fallbackProperty: 'fallback',
   pagePathAttribute: 'page-path',
   pagePathProperty: 'pagePath',
   routingGroupAttribute: 'routing-group',
-  routingGroupProperty: 'routingGroup',
-  routerCallbackProperty: 'routerCallback'
+  routingGroupProperty: 'routingGroup'
 }
 export const setConfig = (key, value) => { config[key] = value }
 
@@ -77,18 +78,33 @@ export function getPagePathFromEl (el) {
 }
 
 export function getRoutingGroupFromEl (el) {
-
   return el.getAttribute(config.routingGroupAttribute) ||
          el[config.routingGroupProperty] ||
          el.constructor[config.routingGroupProperty] ||
          'default'
 }
 
-
 export function getActiveFromEl (el) {
   return el.hasAttribute(config.activeAttribute) ||
          el[config.activeProperty] ||
          false
+}
+
+export function getFallbackFromEl (el) {
+  return el.hasAttribute(config.fallbackAttribute) ||
+         el[config.fallbackProperty] ||
+         el.constructor[config.fallbackProperty] ||
+         false
+}
+
+export function disableFallbackForGroup (group) {
+  if (!elements[group]) elements[group] = { list: [], activeElement: null }
+  elements[group].fallbackDisabled = true
+}
+
+export function enableFallbackForGroup (group) {
+  if (!elements[group]) elements[group] = { list: [], activeElement: null }
+  elements[group].fallbackDisabled = false
 }
 
 // ## Registration and activation of elements
@@ -121,7 +137,6 @@ export function getActiveFromEl (el) {
 // property, which will cause the function to detour, and only run the
 // callback -- skiping any of the activation logic.
 const maybeActivateElement = function (el, e) {
-  debugger
   const path = getPagePathFromEl(el)
   const group = getRoutingGroupFromEl(el)
 
@@ -131,18 +146,23 @@ const maybeActivateElement = function (el, e) {
     return false
   }
 
+  // If fallback is disabled, then don't activate it
+
   // The element doesn't match the path: don't bother doing anything
   const locationMatchedParams = locationMatch(path)
   if (!locationMatchedParams) return
+  // debugger
+
+  if (getFallbackFromEl(el) && elements[group].fallbackDisabled) return
 
   if (allowSwappingActiveElementWith(el, locationMatchedParams.__PATH__)) {
     const oldActiveElement = elements[group].activeElement
 
     // The same element is being activated again: just update the
-    // path (which may have changed) and run the routingCallback
+    // aactivating path (which may have changed) and run the routingCallback
     if (el === oldActiveElement) {
       elements[group].activeElementWithPath = locationMatchedParams.__PATH__
-      if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](locationMatchedParams, e)
+      callRouterCallback(el, locationMatchedParams, e)
 
     // The active element has changed: mark the old one as inactive, make the new
     // element as active, and run the router callback
@@ -152,7 +172,7 @@ const maybeActivateElement = function (el, e) {
       elements[group].activeElement = el
       elements[group].activeElementWithPath = locationMatchedParams.__PATH__
 
-      if (el[config.routerCallbackProperty]) el[config.routerCallbackProperty](locationMatchedParams, e)
+      callRouterCallback(el, locationMatchedParams, e)
     }
     /* Return true or false, depending on the element being active or not */
     return true
@@ -223,7 +243,7 @@ const compareSpecificity = function (a, b) {
   return 0
 }
 
-export const forceActiveElement = (elementToActivate, path = '') => {
+export const activateElement = (elementToActivate, path = '') => {
   const group = getRoutingGroupFromEl(elementToActivate)
 
   const list = elements[group].list
@@ -242,12 +262,16 @@ export const forceActiveElement = (elementToActivate, path = '') => {
       }
       // Call the element's callback if set. Note that the 'path'
       // can well be null
-      if (el[config.routerCallbackProperty]) {
-        const locationParams = locationMatch(path) || {}
-        el[config.routerCallbackProperty](locationParams)
-      }
+      const locationParams = locationMatch(path) || {}
+      callRouterCallback(el, locationParams)
     }
   }
+}
+
+async function callRouterCallback (el, locationParams, e) {
+  if (el.preRouterCallback) await el.preRouterCallback(locationParams, e)
+  if (el.routerCallback) await el.routerCallback(locationParams, e)
+  if (el.postRouterCallback) await el.postRouterCallback(locationParams, e)
 }
 
 // Both the functions above use this simple helper that will toggle the `active`
@@ -267,8 +291,7 @@ export const activateCurrentPath = (e) => {
   for (const group of Object.keys(elements)) {
     const list = elements[group].list
     for (const el of list) {
-      const isActive = maybeActivateElement(el, e)
-      // if (isActive) break
+      maybeActivateElement(el, e)
     }
   }
 }

@@ -18,22 +18,17 @@ export const RoutingPageMixin = (base) => {
       unregisterRoute(this)
     }
 
-    // Only render this page if it's actually visible.
-    shouldUpdate () {
-      return this.active
-    }
-
     locationMatch (checker) {
       return locationMatch(getPagePathFromEl(this), checker)
     }
 
-    // This will make sure that the routerCallback function has
-    // full access to DOM, and anything set in firstUpdated
-    async routerCallbackWithUpdate (p) {
-      if (this.routerCallback) {
-        await this.updateComplete
-        this.routerCallback(p)
-      }
+    async preRouterCallback (params) {
+      await this.updateComplete
+    }
+
+    // Only render this page if it's actually visible.
+    shouldUpdate () {
+      return this.active
     }
   }
 }
