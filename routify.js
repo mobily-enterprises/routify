@@ -39,6 +39,8 @@ let routerInstalled = false
 const config = {
   activeAttribute: 'active',
   activeProperty: 'active',
+  fallbackAttribute: 'fallback',
+  fallbackProperty: 'fallback',
   pagePathAttribute: 'page-path',
   pagePathProperty: 'pagePath',
   routingGroupAttribute: 'routing-group',
@@ -92,27 +94,21 @@ export function getActiveFromEl (el) {
 }
 
 
-export function disableElement (group, element) {
-  if (!elements[group]) elements[group] = { list: [], disabled: [], activeElement: null }
-  const disabled = elements[group].disabled
-  if (disabled.find(el => el === element)) return
-  disabled.push(el)
+export function getFallbackFromEl (el) {
+  return el.hasAttribute(config.fallbackAttribute) ||
+         el[config.fallbackProperty] ||
+         el.constructor[config.fallbackProperty] ||
+         false
 }
 
-export function enableElement (group, element) {
-  if (!elements[group]) {
-    elements[group] = { list: [], disabled: [], activeElement: null }
-    return
-  }
-  elements[group].disabled = elements[group].disabled.filter(el => el !== element)
+export function disableFallbackForGroup (group) {
+  if (!elements[group]) elements[group] = { list: [], activeElement: null }
+  elements[group].fallbackDisabled = true
 }
 
-export function elementIsDisabled (group, element) {
-  if (!elements[group]) {
-    elements[group] = { list: [], disabled: [], activeElement: null }
-    return false
-  }
-  return elements[group].disabled.find(el => el === element)
+export function enableFallbackForGroup (group) {
+  if (!elements[group]) elements[group] = { list: [], activeElement: null }
+  elements[group].fallbackDisabled = false
 }
 
 
@@ -160,9 +156,10 @@ const maybeActivateElement = function (el, e) {
   // The element doesn't match the path: don't bother doing anything
   const locationMatchedParams = locationMatch(path)
   if (!locationMatchedParams) return
-  // debugger
+  debugger
 
-  if (elementIsDisabled(group, el)) return
+  if (getFallbackFromEl(el) && elements[group].fallbackDisabled) return
+
 
   if (allowSwappingActiveElementWith(el, locationMatchedParams.__PATH__)) {
     const oldActiveElement = elements[group].activeElement
@@ -334,7 +331,7 @@ export function registerRoute (el) {
   const group = getRoutingGroupFromEl(el)
 
   /* Create the element group if it doesn't exist already */
-  if (!elements[group]) elements[group] = { list: [], disabled: [], activeElement: null }
+  if (!elements[group]) elements[group] = { list: [], activeElement: null }
 
   /* Install the GLOBAL router -- if it's not already installed */
   if (!routerInstalled) {
@@ -360,7 +357,7 @@ export function registerRoute (el) {
 export function registerRoutesFromSelector (root, selector) {
   for (const el of root.querySelectorAll(selector)) {
     const group = getRoutingGroupFromEl(el)
-    if (!elements[group]) elements[group] = { list: [], disabled: [], activeElement: null }
+    if (!elements[group]) elements[group] = { list: [], activeElement: null }
     if (!elements[group].list.find(item => item === el)) registerRoute(el)
   }
 }
