@@ -3,33 +3,24 @@
 **registerRoute (el)**
 
 The element `el` is registered as a valid route. The element's route is set by the attribute `page-path` or property `pagePath`.
-Once an element is registered, its `active` property _and_ attribute are set to true **if** the browser's location matches the element's path; there are two exceptions to this rule:
+Once an element is registered, its `active` property _and_ attribute are set to true **if** the browser's location matches the element's path.
 
-* if the element has the `disable-activation` attribute or the `disableActivation` property, the `active` property/attribute is untouched
+When the browser's location matches the element's path (or, for fallback elements, when none of the elements match the the browser's location), the element's `routerCallback(params, e)` function is called, where `params` is an object with matching URL parameters and `e` is the click event that generated the change of location. `params.__PATH__` represents the path that triggered the match (since a page can have multiple paths)
 
-* if the element has the `fallback` attribute or property, the `active` property is turned on if the browser's location _doesn't_ match any of the registered elements' path
-
-When the browser's location matches the element's path (or, for fallback elements, when none of the elements match the the browser's location), the element's `routerCallback(params, e)` function is called, where `params` is an object with matching URL parameters and `e` is the click event that generated the change of location.
-
-routify.js allows routing groups; each group will have up to one possible active element, and one different fallback; this allows applications to have several levels of routing; for example, one main application group with pages with routes `/one`, `/two`, `/three` and another group with `/one/a`, `/one/b`, and `/one/c`. The default routing group is called `default`. In order to assign an element to a default group, the attribute `routing-group` or the property `routingGroup` can be set.
+routify.js allows routing groups; each group will only ever have one active element; this allows applications to have several levels of routing; for example, one main application group with pages with routes `/one`, `/two`, `/three` and another group with `/one/a`, `/one/b`, and `/one/c`. The default routing group is called `default`. In order to assign an element to a default group, the attribute `routing-group` or the property `routingGroup` can be set.
 
 _The path template_
 
 The path template has two special characters: `*` and `:`. They will both match not-empty strings. The main difference is that when `routerCallback()` is called, for each `:entry`  the `params` object will have a corresponding `entry`.  For example if the location is `/record/10` and the template is
 `/record/:id`, this `routerCallback(params)` function will be called with `params` equal to `{ id: 10 }`
 
-
-**unregisterRoute (el)**
-
-It unregisters the element from the routing. This should be used before an element is deleted.
+Having `**` at the end of a path (e.g `/**` or `/view/**`) will make sure that there will be a match regardless of
+what follows in the URL.
 
 **registerRoutesFromSelector (root, selector)**
 
 It registers all entries found in the children of element `root` as long as they match the `selector`. The `querySelectorAll` method of the `root` element is used to execute the query.
 
-**unregisterRoutesFromSelector (root, selector)**
-
-It registers all entries found in the children of element `root` as long as they match the `selector`.
 
 **setConfig (key, value)**
 
@@ -45,11 +36,6 @@ Here are the defaults:
   * pagePathProperty: 'pagePath',
   * routingGroupAttribute: 'routing-group',
   * routingGroupProperty: 'routingGroup',
-  * fallbackAttribute: 'fallback',
-  * fallbackProperty: 'fallback',
-  * disableActivationAttribute: 'disable-activation',
-  * disableActivationProperty: 'disableActivation',
-  * routerCallbackProperty: 'routerCallback'
 
 
 **getPagePathFromEl (el)**
@@ -69,16 +55,6 @@ This means that if an element is defined as:
 Returns the routing group associated to the element, sourcing it from the attribute `routing-group` (configurable by setting the config key `routingGroupAttribute`), or the property `routingGroup` of the element or the element's constructor (configurable with config key `routingGroupProperty`).
 
 If it's not set, it returns `default` which is the elements' default group.
-
-**getFallbackFromEl (el)**  
-
-Returns `true` or `false`, sourcing the result from the presence of the attribute `fallback` (configurable by setting the config key `fallbackAttribute`), or the property `fallback` of the element or the element's constructor (configurable with config key `fallbackProperty`).
-
-Only one element must be set as `fallback` in any given group.
-
-**getDisableActivationFromEl (el)**  
-
-Returns `true` or `false`, sourcing the result from the presence of the attribute `disable-activation` (configurable by setting the config key `disableActivationAttribute`), or the property `disableActivation` of the element or the element's constructor (configurable with config key `disableActivationProperty`).
 
 **getActiveFromEl (el)**
 
@@ -107,3 +83,14 @@ Both `*` and `:` character will match anything (as long as it's not empty). The 
 if there is a match, `locationMatch` will return an object where every key is the matching `:key`.
 
 For example if the location is `/record/10` and the template is `/record/:id`, this function will return `{ id: 10 }`
+
+Having `**` at the end of a path (e.g `/**` or `/view/**`) will make sure that there will be a match regardless of
+what follows in the URL.
+
+**unregisterRoute (el)**
+
+It unregisters the element from the routing. This should be used before an element is deleted.
+
+**unregisterRoutesFromSelector (root, selector)**
+
+It registers all entries found in the children of element `root` as long as they match the `selector`.
