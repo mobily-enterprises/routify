@@ -5,15 +5,25 @@
 // management.
 // In a nutshell, all routify.js does is set a specific attribute/property (`active`
 // by default) depending on whether an element satisfies a routing pattern
-// (e.g. '/view-jobs/:id'). It will also run a callback
-
+// (e.g. '/view-jobs/:id'). It will also run a callback ('routerCallback') whenever
+// the routing matches, so that pages can do whatever they are supposed to do when
+// they become visible.
+//
+// A page can match multiple paths. Also, paths can contain wild characters:
+// * `/preferences/*/large` -- will match `/preferences/user/large` and
+//   `/preferences/company/large`. Basicaly, `*` will match one word anywhere in the path
+// *  `/view/**` -- will match `/view/one/two/three` and `/view/whatever/here`. Basically,
+//    `**` will match anything regardless of what follows.
+//
 // ## Module's variables
 //
 // routify.js uses some variables common to all functions: the list of
 // observed elements (`elements`), a flag to know if the `installRouter` was
-// already called (`routerInstalled`) and a default fallback element (`fallback`)
-
-// Note that the router will only be installed once, globally.
+// already called (`routerInstalled`)
+//
+// Note that the router will only be installed once, globally, when the first
+// route is registered. More of that later.
+//
 
 const elements = { }
 let routerInstalled = false
@@ -24,18 +34,15 @@ let routerInstalled = false
 // keys for the module variable `config`. The configuration defines
 // what attribute and property are used for:
 // * `activeAttribute/activeProperty` -- elements' active flag
+// * `fallbackAttribute/fallbackProperty` -- define an element as fallback.
 // * `pagePathAttribute/pagePathProperty` -- elements' paths
 // * `routingGroupAttribute/routingGroupProperty` -- elements' routing groups
-// * `fallbackAttribute/fallbackProperty` -- define an element as fallback
-// * `routerCallbackProperty` -- elements' callback functions
-// * `disableFallbackOnEvents` -- the module's suppression of fallback pages on mouse events (useful for SPAs
-//   doing dynamic loading, where at click time an element might not yet be initialised
-//   and the Not Found page would "flash" before the element is rendered and activated). SPAs using dynamic loading
-//   must remember to do this: `if (!mod) activateCurrentPath()` if they want to display 404 for failed loading
 //
-// Developers can redefine these by using the `setConfig()` function:
+// Developers can redefine these by using the `setConfig()` function. For example,
+// developers can configure routify so that the attribute `activated` is
+// added to a matching element like this:
 //
-//     setConfig('activeProperty', 'activated')
+//     setConfig('activeAttribute', 'activated')
 const config = {
   activeAttribute: 'active',
   activeProperty: 'active',
@@ -45,12 +52,11 @@ const config = {
   pagePathProperty: 'pagePath',
   routingGroupAttribute: 'routing-group',
   routingGroupProperty: 'routingGroup'
-  //routerCallbackProperty: 'routerCallback'
 }
 export const setConfig = (key, value) => { config[key] = value }
 
 // An element can be configured for routify.js in several different ways: via
-// attributes, properties or constructors' properties.
+// attributes (to the HTML element), properties or constructors' properties.
 // For example the path an element will depend on for activation can be specified
 // using:
 // * The attribute `page-path`
@@ -63,7 +69,7 @@ export const setConfig = (key, value) => { config[key] = value }
 //       static get pagePath () { return '/page-one/:id' }
 //
 // The following functions are helper functions to facilitate the fetching
-// of the configuration options wherever they are.
+// of the configuration options wherever they are, returning sane defaults.
 
 export function getPagePathFromEl (el) {
   const toArray = p => {
@@ -79,13 +85,11 @@ export function getPagePathFromEl (el) {
 }
 
 export function getRoutingGroupFromEl (el) {
-
   return el.getAttribute(config.routingGroupAttribute) ||
          el[config.routingGroupProperty] ||
          el.constructor[config.routingGroupProperty] ||
          'default'
 }
-
 
 export function getActiveFromEl (el) {
   return el.hasAttribute(config.activeAttribute) ||
@@ -93,13 +97,26 @@ export function getActiveFromEl (el) {
          false
 }
 
-
 export function getFallbackFromEl (el) {
   return el.hasAttribute(config.fallbackAttribute) ||
          el[config.fallbackProperty] ||
          el.constructor[config.fallbackProperty] ||
          false
 }
+
+// ## Fallback
+//
+// In routify, you don't need to define a specific page as fallback since you
+// can simply define a catch-all page in tour routes. For example:
+//
+// * <view-jobs page-path="/jobs">
+// * <view-friends page-path="/friends">
+// * <view-not-found page-path="/**">
+//
+// The third page, `view-not-found`, will be active when none of the others
+// match -- hence it's a fallback.
+// However, there are cases when it's crucial to define an element as fallback
+// when using routify with dynamically loaded page.
 
 export function disableFallbackForGroup (group) {
   if (!elements[group]) elements[group] = { list: [], activeElement: null }
@@ -110,7 +127,6 @@ export function enableFallbackForGroup (group) {
   if (!elements[group]) elements[group] = { list: [], activeElement: null }
   elements[group].fallbackDisabled = false
 }
-
 
 // ## Registration and activation of elements
 //
@@ -127,20 +143,13 @@ export function enableFallbackForGroup (group) {
 // attribute/property as true. The check is done using the `locationMatch()`
 // function explained later.
 //
-// It's crucial to remember that it only works on _one_ element: it is responsible
+// This function only works on _one_ element: it is responsible
 // for _maybe_ activating _one specific_ element, where _activating_ means setting
-// the active attribute/property to true.
-// If the element is active, it will also set the module's `activeElement` variable
-// and will attempt to run the `routerCallback()` function.
+// the active attribute/property to true and running `routerCallback()`.
+// If the element is active, it will also set the module's `activeElement` flag as truer
+// in the module's `elements` variable  and will attempt to run the `routerCallback()`
+// function of the freshly activated module.
 //
-// Some elements might want to register for the routing callback, but _without_
-// being activated. The app's main page is a prime example of this: it will want
-// to know if the current page has changed in order to 'know' what page is being
-// displayed (useful to highlight the right tab).
-//
-// This is achieved using the `disable-activation` attribute or `disableActivation`
-// property, which will cause the function to detour, and only run the
-// callback -- skiping any of the activation logic.
 const maybeActivateElement = function (el, e) {
   const path = getPagePathFromEl(el)
   const group = getRoutingGroupFromEl(el)
@@ -152,7 +161,6 @@ const maybeActivateElement = function (el, e) {
   }
 
   // If fallback is disabled, then don't activate it
-
   // The element doesn't match the path: don't bother doing anything
   const locationMatchedParams = locationMatch(path)
   if (!locationMatchedParams) return
@@ -160,12 +168,11 @@ const maybeActivateElement = function (el, e) {
 
   if (getFallbackFromEl(el) && elements[group].fallbackDisabled) return
 
-
   if (allowSwappingActiveElementWith(el, locationMatchedParams.__PATH__)) {
     const oldActiveElement = elements[group].activeElement
 
-    // The same element is being activated again: just update the
-    // aactivating path (which may have changed) and run the routingCallback
+    /* The same element is being activated again: just update the */
+    /* aactivating path (which may have changed) and run the routingCallback */
     if (el === oldActiveElement) {
       elements[group].activeElementWithPath = locationMatchedParams.__PATH__
       callRouterCallback(el, locationMatchedParams, e)
@@ -274,7 +281,7 @@ export const activateElement = (elementToActivate, path = '') => {
   }
 }
 
-async function callRouterCallback(el, locationParams, e) {
+async function callRouterCallback (el, locationParams, e) {
   if (el.preRouterCallback) await el.preRouterCallback(locationParams, e)
   if (el.routerCallback) await el.routerCallback(locationParams, e)
   if (el.postRouterCallback) await el.postRouterCallback(locationParams, e)
@@ -297,7 +304,7 @@ export const activateCurrentPath = (e) => {
   for (const group of Object.keys(elements)) {
     const list = elements[group].list
     for (const el of list) {
-      const isActive = maybeActivateElement(el, e)
+      maybeActivateElement(el, e)
       // if (isActive) break
     }
   }
