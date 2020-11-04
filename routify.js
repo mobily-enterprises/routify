@@ -1,7 +1,8 @@
 // Routify's source code
 // ======================
 //
-// routify.js is an unintrusive module that deals with routing
+// routify.js is an unintrusive module that deals with routing.
+//
 // In a nutshell, all routify.js does is set a specific attribute/property (`active`
 // by default) depending on whether an element satisfies a routing pattern
 // (e.g. '/view-jobs/:id'). It will also run a callback ('routerCallback') whenever
