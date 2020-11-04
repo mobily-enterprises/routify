@@ -9,6 +9,7 @@
 // they become visible.
 //
 // A page can match multiple paths. Also, paths can contain wild characters:
+//
 // * `/preferences/*/large` -- will match `/preferences/user/large` and
 //   `/preferences/company/large`. Basicaly, `*` will match one word anywhere in the path
 // *  `/view/**` -- will match `/view/one/two/three` and `/view/whatever`. Basically,
