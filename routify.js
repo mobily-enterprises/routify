@@ -190,7 +190,7 @@ const maybeActivateElement = function (el, e) {
 // window's path. If it doesn't, there is nothing to do.
   const locationMatchedParams = locationMatch(path)
   if (!locationMatchedParams) return
-  debugger
+  // debugger
 
 // Matching a path is not enough. Keep in mind that `activateCurrentPath()`
 // will go through _every_ element in the group. So, while `/account` might well
@@ -326,7 +326,7 @@ export const activateElement = (elementToActivate, path = '') => {
       toggleElementActive(el, false)
 
     /* If it's the element to activate, do so */
-    /* Note that the matching path is also stored if it's passed*/
+    /* Note that the matching path is also stored if it's passed */
     } else {
       if (!getActiveFromEl(el)) {
         toggleElementActive(el, true)
