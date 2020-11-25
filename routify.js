@@ -479,13 +479,16 @@ export function unregisterRoutesFromSelector (root, selector) {
 export function locationMatch (templateUrl, checker) {
   if (!templateUrl) return
   const locationMatchExecutor = (templateUrl, checker) => {
-    /* Prepare the basic variables */
+    //
+    // Prepare the basic variables
     const templateUrlObject = new URL(templateUrl, 'http://localhost/')
     const templatePath = templateUrlObject.pathname.split('/')
     const browserUrlObject = window.location
     const browserPath = browserUrlObject.pathname.split('/')
 
     /* NOTE: This isn't true anymore since ** was introduced */
+    /* Now the full length of browserPath is checked (taking care of */
+    /* the ** exception) */
     /* if (templatePath.length !== browserPath.length) return false */
 
     // Check the hash -- if present or marked as "must be empty"
@@ -502,8 +505,15 @@ export function locationMatch (templateUrl, checker) {
 
     // Check the callbacks
     const callbackParams = {}
-    for (let i = 0, l = templatePath.length; i < l; i++) {
-      if (templatePath[i].startsWith(':')) {
+    // Note: this starts from "1" as since each path starts with "/", the
+    // first result of the split by "/" will be "".
+    for (let i = 1, l = browserPath.length; i < l; i++) {
+      //
+      // The template path finishes before the browser path: can't possibly match
+      // (unless the template has **, which will imply a match regardless)
+      if (!templatePath[i] && templatePath[i] !== '**') return false
+
+      if (templatePath[i] && templatePath[i].startsWith(':')) {
         callbackParams[templatePath[i].substr(1)] = browserPath[i]
       } else {
         // If the template accepts anything, and the browser has something,
