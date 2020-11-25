@@ -192,7 +192,6 @@ const maybeActivateElement = function (el, e) {
 // window's path. If it doesn't, there is nothing to do.
   const locationMatchedParams = locationMatch(path)
   if (!locationMatchedParams) return
-  debugger
 
 // Matching a path is not enough. Keep in mind that `activateCurrentPath()`
 // will go through _every_ element in the group. So, while `/account` might well
