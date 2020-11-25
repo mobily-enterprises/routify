@@ -1,6 +1,6 @@
 {
   "name": "routify",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "The most powerful client-side routing in the west",
   "main": "roitify.js",
   "directories": {
