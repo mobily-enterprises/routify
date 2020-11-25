@@ -480,14 +480,14 @@ export function unregisterRoutesFromSelector (root, selector) {
 export function locationMatch (templateUrl, checker) {
   if (!templateUrl) return
   const locationMatchExecutor = (templateUrl, checker) => {
-    //
-    // Prepare the basic variables
+    /* Prepare the basic variables */
     const templateUrlObject = new URL(templateUrl, 'http://localhost/')
     const templatePath = templateUrlObject.pathname.split('/')
     const browserUrlObject = window.location
     const browserPath = browserUrlObject.pathname.split('/')
 
-    if (templatePath.length !== browserPath.length) return false
+    /* NOTE: This isn't true anymore since ** was introduced */
+    /* if (templatePath.length !== browserPath.length) return false */
 
     // Check the hash -- if present or marked as "must be empty"
     const templateHash = (templateUrlObject.hash || '#').substr(1)
