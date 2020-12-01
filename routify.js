@@ -292,7 +292,7 @@ const compareSpecificity = function (a, b) {
 
     /* Whichever is longer wins */
     if (aToken && typeof bToken === 'undefined') return 1
-    if (bToken && typeof aToken === 'undefined') return -1
+    if (bToken && typeof bToken === 'undefined') return -1
 
     /* They both start with non-special characters: next */
     if (!firstCharacterSpecial(aToken) && !firstCharacterSpecial(bToken)) continue
@@ -494,6 +494,8 @@ export function locationMatch (templateUrl, checker) {
     // Check the hash -- if present or marked as "must be empty"
     const templateHash = (templateUrlObject.hash || '#').substr(1)
     const browserHash = (browserUrlObject.hash || '#').substr(1)
+
+    /*
     const templateHashEmpty = templateUrl.endsWith('#')
     let hashMatching = true
     if (templateHash || templateHashEmpty) {
@@ -502,16 +504,24 @@ export function locationMatch (templateUrl, checker) {
       else hashMatching = templateHash === browserHash
     }
     if (!hashMatching) return false
+    */
+
+    if (templateHash) templatePath.push(templateHash)
+    if (browserHash) browserPath.push(browserHash)
+
+    // if (templateUrl === '/:page/**') debugger
+    // if (templateUrl === '/view-jobs/:id') debugger
+    // if (templateUrl === '/view-jobs/:jobId/**') debugger
 
     // Check the callbacks
     const callbackParams = {}
     // Note: this starts from "1" as since each path starts with "/", the
     // first result of the split by "/" will be "".
-    for (let i = 1, l = browserPath.length; i < l; i++) {
+    for (let i = 1, l = Math.max(browserPath.length, templatePath.length); i < l; i++) {
       //
-      // The template path finishes before the browser path: can't possibly match
+      // The browser path finishes before the browser path: can't possibly match
       // (unless the template has **, which will imply a match regardless)
-      if (!templatePath[i] && templatePath[i] !== '**') return false
+      // if (!browserPath[i] && templatePath[i] !== '**') return false
 
       if (templatePath[i] && templatePath[i].startsWith(':')) {
         callbackParams[templatePath[i].substr(1)] = browserPath[i]
@@ -520,7 +530,9 @@ export function locationMatch (templateUrl, checker) {
         // skip the next check
         if (templatePath[i] === '*' && browserPath[i]) continue
 
-        if (templatePath[i] === '**') break
+        // If the template accepts anything *training* and the browser
+        // has something, break: it's all good, no need to check further
+        if (templatePath[i] === '**' && browserPath[i]) break
 
         if (templatePath[i] !== browserPath[i]) return false
       }
