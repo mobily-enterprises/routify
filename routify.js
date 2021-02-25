@@ -278,12 +278,12 @@ const compareSpecificity = function (a, b) {
   }
 
   const aObject = new URL(a, 'http://localhost/')
-  const aTokens = aObject.pathname.split('/')
+  const aTokens = (aObject.pathname + aObject.hash).split(/[\/\#]/)
 
   const bObject = new URL(b, 'http://localhost/')
-  const bTokens = bObject.pathname.split('/')
+  const bTokens = (bObject.pathname + bObject.hash).split(/[\/\#]/)
 
-  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+  for (let i = 0; i < Math.max(aTokens.length, bTokens.length); i++) {
     const aToken = aTokens[i]
     const bToken = bTokens[i]
 
