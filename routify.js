@@ -292,7 +292,7 @@ const compareSpecificity = function (a, b) {
 
     /* Whichever is longer wins */
     if (aToken && typeof bToken === 'undefined') return 1
-    if (bToken && typeof bToken === 'undefined') return -1
+    if (bToken && typeof aToken === 'undefined') return -1
 
     /* They both start with non-special characters: next */
     if (!firstCharacterSpecial(aToken) && !firstCharacterSpecial(bToken)) continue
